@@ -26,11 +26,13 @@ export const DEFAULT_SETTINGS = {
 // 年投入时间 =（在场 + 加班 + 往返通勤）× 每月工作日 × 12
 export function computeRealHourly(s, overrides = {}) {
   const p = { ...s, ...overrides }
-  const annualIncome = p.net_monthly * p.pay_months
-  const annualCost = p.monthly_cost * 12
-  const commuteHours = (p.commute_min * 2) / 60
-  const dailyHours = p.onsite_hours + p.overtime_hours + commuteHours
-  const annualHours = dailyHours * p.work_days * 12
+  // 表单值可能是字符串（输入框/加减按钮），全部强制转数字，避免 "9" + 2 变成字符串拼接
+  const num = (v) => Number(v) || 0
+  const annualIncome = num(p.net_monthly) * num(p.pay_months)
+  const annualCost = num(p.monthly_cost) * 12
+  const commuteHours = (num(p.commute_min) * 2) / 60
+  const dailyHours = num(p.onsite_hours) + num(p.overtime_hours) + commuteHours
+  const annualHours = dailyHours * num(p.work_days) * 12
   const annualNet = annualIncome - annualCost
   const rate = annualHours > 0 ? annualNet / annualHours : 0
   return { annualIncome, annualCost, commuteHours, dailyHours, annualHours, annualNet, rate }

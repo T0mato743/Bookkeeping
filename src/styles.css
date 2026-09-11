@@ -586,6 +586,24 @@ body {
 
 .sim-arrow { font-size: 20px; color: var(--muted); }
 
+/* ---------- 渲染崩溃兜底 ---------- */
+.crash-card {
+  max-width: 480px;
+  margin: 80px auto;
+  text-align: center;
+}
+
+.crash-card h2 { margin: 8px 0; }
+
+.crash-msg {
+  background: #fef2f2;
+  color: #b91c1c;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 12.5px;
+  word-break: break-all;
+}
+
 /* ---------- 登录页 ---------- */
 .auth-wrap {
   min-height: 100vh;
