@@ -28,7 +28,6 @@ export default function MonthlySummary({ transactions }) {
           <span className={`sum-val ${m.balance >= 0 ? 'in' : 'out'}`}>{fmtMoney(m.balance, 0)}</span>
         </div>
       </div>
-      <p className="sum-hint">「房租 / 水电煤 / 话费网费 / 订阅服务 / 保险」算固定支出，其余算弹性支出。</p>
     </section>
   )
 }

@@ -39,11 +39,8 @@ export default function FreedomFund({ transactions, settings }) {
         <Bar value={balance} target={st} color="linear-gradient(90deg,#10b981,#34d399)" />
         <div className="fund-sub">
           {fmtMoney(balance, 0)} / {fmtMoney(st, 0)}
-          {avgExp > 0 && <> · 月均支出 {fmtMoney(avgExp, 0)}</>}
         </div>
       </div>
-
-      {balance < 0 && <p className="sum-hint">当前总结余为负，先想办法让现金流转正吧 💪</p>}
     </section>
   )
 }

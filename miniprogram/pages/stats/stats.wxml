@@ -1,0 +1,31 @@
+<view wx:if="{{err}}" class="card"><view class="err-text">{{err}}</view></view>
+
+<view class="card">
+  <view class="card-title">本月总结</view>
+  <view class="sum-grid">
+    <view class="sum-item"><text class="sl">收入</text><text class="sv in">{{income}}</text></view>
+    <view class="sum-item"><text class="sl">固定支出</text><text class="sv out">{{fixed}}</text></view>
+    <view class="sum-item"><text class="sl">弹性支出</text><text class="sv out">{{flexible}}</text></view>
+    <view class="sum-item"><text class="sl">结余</text><text class="sv">{{balance}}</text></view>
+  </view>
+</view>
+
+<view class="card">
+  <view class="card-title">自由基金</view>
+  <view class="fund-line"><text>进度</text><text class="fp">{{fundPct === 0 ? '—' : fundPct + '%'}}</text></view>
+  <view class="bar"><view class="bar-fill fund" style="width: {{fundPct}}%"></view></view>
+  <view class="fund-sub">{{fundText}}</view>
+</view>
+
+<view class="card">
+  <view class="card-title">安全垫</view>
+  <view class="fund-line"><text>进度</text><text class="fp">{{safetyPct === 0 ? '—' : safetyPct + '%'}}</text></view>
+  <view class="bar"><view class="bar-fill safe" style="width: {{safetyPct}}%"></view></view>
+  <view class="fund-sub">{{safetyText}}</view>
+  <view class="fund-sub">总结余 {{totalText}}</view>
+</view>
+
+<view class="card">
+  <view class="card-title">存款曲线</view>
+  <canvas id="chart" type="2d" class="chart"></canvas>
+</view>

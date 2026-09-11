@@ -1,0 +1,20 @@
+<view class="wrap">
+  <view class="logo">⏱️</view>
+  <view class="title">打工人小账本</view>
+  <view class="sub">与网页版同一账号，数据实时同步</view>
+
+  <view class="seg">
+    <view class="seg-btn {{mode === 'login' ? 'on' : ''}}" data-mode="login" bindtap="setMode">登录</view>
+    <view class="seg-btn {{mode === 'signup' ? 'on' : ''}}" data-mode="signup" bindtap="setMode">注册</view>
+  </view>
+
+  <input class="ipt" placeholder="邮箱" value="{{email}}" bindinput="onInputEmail" />
+  <input class="ipt" placeholder="密码（至少 6 位）" password value="{{password}}" bindinput="onInputPwd" />
+
+  <view wx:if="{{err}}" class="err-text">⚠️ {{err}}</view>
+  <view wx:if="{{notice}}" class="notice">{{notice}}</view>
+
+  <button class="btn-primary" loading="{{busy}}" bindtap="submit">
+    {{mode === 'login' ? '登录' : '注册'}}
+  </button>
+</view>

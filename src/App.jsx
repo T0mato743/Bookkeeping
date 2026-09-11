@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { supabase } from './supabaseClient'
+import { computeRealHourly, monthSummary, totalBalance, currentMonth, fmtMoney, fmtHours, avgMonthlyExpense } from './utils'
 import AuthView from './components/AuthView'
 import SettingsCard from './components/SettingsCard'
 import QuickAdd from './components/QuickAdd'
@@ -17,7 +18,7 @@ export default function App() {
   const [transactions, setTransactions] = useState([])
   const [settings, setSettings] = useState(null)
   const [writeErr, setWriteErr] = useState(null) // { msg, retry }
-  const [syncedAt, setSyncedAt] = useState(null)
+  const [synced, setSynced] = useState(false)
 
   // ---------- 认证 ----------
   useEffect(() => {
@@ -60,7 +61,7 @@ export default function App() {
         if (insErr) throw insErr
         setSettings(created)
       }
-      setSyncedAt(new Date())
+      setSynced(true)
       setLoadState('ready')
     } catch (e) {
       setLoadState('error')
@@ -91,12 +92,12 @@ export default function App() {
         }
         return [row, ...list]
       })
-      setSyncedAt(new Date())
+      setSynced(true)
     }
     const applySettings = (p) => {
       if (p.eventType === 'INSERT' || p.eventType === 'UPDATE') {
         setSettings((cur) => (cur && cur.updated_at > p.new.updated_at ? cur : p.new))
-        setSyncedAt(new Date())
+        setSynced(true)
       }
     }
     const ch = supabase
@@ -145,12 +146,12 @@ export default function App() {
   if (!authReady) {
     return (
       <div className="app">
-        <HeaderShell />
+        <div className="hero skel-hero" />
         <div className="grid">
-          <SkeletonCard h={220} cls="c-hourly" />
-          <SkeletonCard h={220} cls="c-add" />
-          <SkeletonCard h={240} cls="c-recent" />
-          <SkeletonCard h={240} cls="c-summary" />
+          <SkeletonCard h={260} cls="c-hourly" />
+          <SkeletonCard h={260} cls="c-add" />
+          <SkeletonCard h={200} cls="c-recent" />
+          <SkeletonCard h={200} cls="c-summary" />
         </div>
       </div>
     )
@@ -161,20 +162,51 @@ export default function App() {
   const loading = loadState === 'loading'
   const skeleton = (cls, h) => <SkeletonCard h={h} cls={cls} />
 
+  const rate = settings ? computeRealHourly(settings).rate : 0
+  const mBalance = monthSummary(transactions, currentMonth()).balance
+  const total = totalBalance(transactions)
+  const avgExp = avgMonthlyExpense(transactions)
+  const cushion = avgExp > 0 ? total / avgExp : null
+
   return (
     <div className="app">
       <header className="topbar">
         <div className="topbar-title">
           ⏱️ 打工人小账本
-          <span className="sync-dot" title={syncedAt ? '已连接云端，实时同步中' : '等待同步'}>
-            {syncedAt ? '● 云端已同步' : '○ 连接中'}
-          </span>
+          <span className={`sync-dot ${synced ? 'on' : ''}`} title={synced ? '云端已同步' : '同步中'} />
         </div>
         <div className="topbar-right">
           <span className="user-email">{session.user.email}</span>
           <button className="btn-ghost" onClick={signOut}>退出</button>
         </div>
       </header>
+
+      {/* 英雄区：真实时薪 + 关键数字 */}
+      {loading || !settings ? (
+        <div className="hero skel-hero" />
+      ) : (
+        <section className="hero">
+          <div className="hero-label">我的真实时薪</div>
+          <div className="hero-rate">
+            {fmtMoney(rate)}
+            <span className="hero-unit">/小时</span>
+          </div>
+          <div className="hero-stats">
+            <div className="hero-stat">
+              <span className="hs-label">本月结余</span>
+              <span className={`hs-val ${mBalance >= 0 ? '' : 'neg'}`}>{fmtMoney(mBalance, 0)}</span>
+            </div>
+            <div className="hero-stat">
+              <span className="hs-label">累计结余</span>
+              <span className={`hs-val ${total >= 0 ? '' : 'neg'}`}>{fmtMoney(total, 0)}</span>
+            </div>
+            <div className="hero-stat">
+              <span className="hs-label">安全垫</span>
+              <span className="hs-val">{cushion == null ? '—' : fmtHours(cushion)}</span>
+            </div>
+          </div>
+        </section>
+      )}
 
       {loadState === 'error' && (
         <div className="banner banner-err">
@@ -186,14 +218,12 @@ export default function App() {
       )}
 
       <main className="grid">
-        {/* 真实时薪计算器（也是个人设置） */}
         {loading || !settings
-          ? skeleton('c-hourly', 320)
+          ? skeleton('c-hourly', 340)
           : <SettingsCard settings={settings} onWriteError={reportWriteError} />}
 
-        {/* 10 秒记账 */}
         {loading || !settings
-          ? skeleton('c-add', 320)
+          ? skeleton('c-add', 340)
           : <QuickAdd
               userId={uid}
               settings={settings}
@@ -203,7 +233,6 @@ export default function App() {
               onWriteError={reportWriteError}
             />}
 
-        {/* 最近 4 笔 */}
         <RecentList
           transactions={transactions}
           loading={loading}
@@ -212,26 +241,20 @@ export default function App() {
           onWriteError={reportWriteError}
         />
 
-        {/* 月度总结 */}
-        {loading ? skeleton('c-summary', 240) : <MonthlySummary transactions={transactions} />}
+        {loading ? skeleton('c-summary', 220) : <MonthlySummary transactions={transactions} />}
 
-        {/* 自由基金 + 安全垫 */}
         {loading || !settings
-          ? skeleton('c-fund', 240)
+          ? skeleton('c-fund', 220)
           : <FreedomFund transactions={transactions} settings={settings} />}
 
-        {/* 存款曲线（原生 SVG） */}
         {loading || !settings
           ? skeleton('c-chart', 320)
           : <SavingsChart transactions={transactions} settings={settings} />}
 
-        {/* 情景模拟 */}
         {loading || !settings
-          ? skeleton('c-sim', 260)
+          ? skeleton('c-sim', 240)
           : <ScenarioSim settings={settings} />}
       </main>
-
-      <footer className="foot">数据实时存储于 Supabase 云端 · 换设备登录同一账号即可同步</footer>
 
       {writeErr && (
         <div className="toast">
@@ -245,14 +268,6 @@ export default function App() {
         </div>
       )}
     </div>
-  )
-}
-
-function HeaderShell() {
-  return (
-    <header className="topbar">
-      <div className="topbar-title">⏱️ 打工人小账本</div>
-    </header>
   )
 }
 

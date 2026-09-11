@@ -1,16 +1,15 @@
 import { useState } from 'react'
 import { supabase } from '../supabaseClient'
-import { fmtMoney, EXPENSE_CATEGORIES, INCOME_CATEGORIES } from '../utils'
+import { fmtMoney, catIcon, EXPENSE_CATEGORIES, INCOME_CATEGORIES } from '../utils'
 
 export default function RecentList({ transactions, loading, markTxLocal, removeTxLocal, onWriteError }) {
   if (loading) {
     return (
       <section className="card c-recent">
-        <div className="card-head"><h2>最近记录</h2></div>
-        <div className="skel" style={{ height: 48 }} />
-        <div className="skel" style={{ height: 48 }} />
-        <div className="skel" style={{ height: 48 }} />
-        <div className="skel" style={{ height: 48 }} />
+        <div className="card-head"><h2>最近</h2></div>
+        <div className="skel" style={{ height: 52 }} />
+        <div className="skel" style={{ height: 52 }} />
+        <div className="skel" style={{ height: 52 }} />
       </section>
     )
   }
@@ -20,11 +19,13 @@ export default function RecentList({ transactions, loading, markTxLocal, removeT
   return (
     <section className="card c-recent">
       <div className="card-head">
-        <h2>最近 4 笔</h2>
-        <span className="card-tag">共 {transactions.length} 笔</span>
+        <h2>最近</h2>
+        <button className="link-btn" onClick={() => document.querySelector('.c-summary')?.scrollIntoView({ behavior: 'smooth' })}>
+          本月汇总 ↓
+        </button>
       </div>
       {recent.length === 0 ? (
-        <div className="empty">还没有记录，去右边记一笔吧 →</div>
+        <div className="empty">还没有记录，记一笔吧</div>
       ) : (
         <ul className="tx-list">
           {recent.map((t) => (
@@ -77,6 +78,7 @@ function TxRow({ tx, markTxLocal, removeTxLocal, onWriteError }) {
   }
 
   const isIncome = tx.kind === 'income'
+  const date = tx.occurred_at ? tx.occurred_at.slice(5).replace('-', '/') : ''
 
   return (
     <li className={`tx-row ${tx._pending ? 'pending' : ''}`}>
@@ -92,6 +94,7 @@ function TxRow({ tx, markTxLocal, removeTxLocal, onWriteError }) {
             </select>
             <input
               type="number"
+              inputMode="decimal"
               step="0.01"
               min="0"
               value={draft.amount}
@@ -113,15 +116,16 @@ function TxRow({ tx, markTxLocal, removeTxLocal, onWriteError }) {
           </div>
           <div className="tx-edit-actions">
             <button className="btn-small" onClick={saveEdit}>保存</button>
-            <button className="btn-small ghost" onClick={() => setEditing(false)}>取消</button>
+            <button className="btn-small ghost2" onClick={() => setEditing(false)}>取消</button>
           </div>
         </div>
       ) : (
         <>
+          <span className="tx-avatar">{catIcon(tx.category)}</span>
           <div className="tx-main">
             <span className="tx-cat">{tx.category}</span>
             {tx.note && <span className="tx-note">{tx.note}</span>}
-            <span className="tx-date">{tx.occurred_at}</span>
+            <span className="tx-date">{date}</span>
           </div>
           <div className="tx-side">
             <span className={`tx-amount ${isIncome ? 'in' : 'out'}`}>

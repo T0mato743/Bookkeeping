@@ -32,10 +32,10 @@ export default function SavingsChart({ transactions, settings }) {
     <section className="card c-chart">
       <div className="card-head">
         <h2>存款曲线</h2>
-        <span className="card-tag">每月累计结余 · 原生 SVG</span>
+        <span className="card-tag">按月累计</span>
       </div>
       {!chart ? (
-        <div className="empty">记几笔账之后，这里会长出一条属于你的曲线 📈</div>
+        <div className="empty">记几笔账，这里会长出你的曲线 📈</div>
       ) : (
         <svg viewBox={`0 0 ${W} ${H}`} className="chart-svg" role="img" aria-label="存款曲线">
           {/* 网格与 Y 轴刻度 */}

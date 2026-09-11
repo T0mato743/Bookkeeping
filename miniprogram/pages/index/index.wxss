@@ -1,0 +1,138 @@
+.hero {
+  background: linear-gradient(135deg, #115e59, #134e4a 55%, #0b3f3b);
+  color: #fff;
+  border-radius: 20px;
+  padding: 22px 20px 16px;
+  margin: 12px 16px;
+  box-shadow: 0 12px 28px rgba(17, 94, 89, 0.35);
+}
+
+.hero-label {
+  font-size: 12.5px;
+  opacity: 0.75;
+  letter-spacing: 1px;
+}
+
+.hero-rate {
+  font-size: 38px;
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+.hero-unit {
+  font-size: 14px;
+  font-weight: 500;
+  opacity: 0.7;
+  margin-left: 4px;
+}
+
+.hero-balance {
+  font-size: 13px;
+  opacity: 0.85;
+  margin-top: 8px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.amount-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #e6f5f3;
+  border-radius: 14px;
+  padding: 12px;
+  margin-bottom: 12px;
+}
+
+.cny {
+  font-size: 20px;
+  font-weight: 700;
+  color: #0f766e;
+  margin-right: 6px;
+}
+
+.amt {
+  font-size: 30px;
+  font-weight: 800;
+  text-align: center;
+  width: 100%;
+}
+
+.cat-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.cat-chip {
+  border: 1.5px solid #e6e9ee;
+  background: #fff;
+  border-radius: 12px;
+  padding: 8px 2px 6px;
+  font-size: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.cat-chip.on {
+  border-color: #0f766e;
+  background: #e6f5f3;
+  color: #115e59;
+  font-weight: 700;
+}
+
+.ci { font-size: 20px; }
+
+.ipt {
+  width: 100%;
+  background: #fafbfc;
+  border: 1.5px solid #e6e9ee;
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 15px;
+  margin-bottom: 12px;
+  box-sizing: border-box;
+}
+
+.tx-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid #f2f4f6;
+}
+
+.tx-row:last-child { border-bottom: none; }
+
+.tx-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  background: #f1f3f6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+.tx-main { flex: 1; min-width: 0; }
+
+.tx-cat { font-size: 13.5px; font-weight: 700; }
+
+.tx-note { color: #7b8794; font-size: 12px; font-weight: 400; }
+
+.tx-date { color: #7b8794; font-size: 11px; }
+
+.tx-amount { font-weight: 800; font-size: 14.5px; }
+
+.tx-amount.in { color: #059669; }
+.tx-amount.out { color: #e11d48; }
+
+.tx-del {
+  color: #7b8794;
+  font-size: 14px;
+  padding: 6px 8px;
+}

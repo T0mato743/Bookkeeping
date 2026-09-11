@@ -1,0 +1,52 @@
+.rate-line {
+  font-size: 13px;
+  color: #7b8794;
+  margin-bottom: 12px;
+}
+
+.rate {
+  font-size: 18px;
+  font-weight: 800;
+  color: #0f766e;
+}
+
+.f-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 0;
+  border-bottom: 1px solid #f2f4f6;
+}
+
+.f-row:last-of-type { border-bottom: none; }
+
+.f-label { font-size: 13.5px; color: #37474f; }
+
+.f-ipt {
+  width: 140px;
+  text-align: right;
+  font-size: 15px;
+  font-weight: 600;
+  background: #fafbfc;
+  border: 1.5px solid #e6e9ee;
+  border-radius: 8px;
+  padding: 7px 10px;
+}
+
+.acc-email { font-size: 13.5px; font-weight: 600; }
+
+.acc-hint {
+  font-size: 12px;
+  color: #7b8794;
+  margin: 4px 0 14px;
+}
+
+.btn-logout {
+  background: #fff;
+  color: #e11d48;
+  border: 1.5px solid #fbcfe0;
+  border-radius: 12px;
+  font-size: 14px;
+  padding: 10px 0;
+}
+.btn-logout::after { border: none; }

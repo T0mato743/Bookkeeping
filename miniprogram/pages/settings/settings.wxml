@@ -1,0 +1,24 @@
+<view wx:if="{{err}}" class="card"><view class="err-text">{{err}}</view></view>
+
+<view class="card">
+  <view class="card-title">时薪参数</view>
+  <view class="rate-line">当前真实时薪 <text class="rate">{{rateText}}/小时</text></view>
+  <view wx:for="{{form}}" wx:key="key" class="f-row">
+    <text class="f-label">{{item.label}}</text>
+    <input
+      class="f-ipt"
+      type="{{item.type}}"
+      value="{{item.value}}"
+      data-idx="{{index}}"
+      bindinput="onField"
+    />
+  </view>
+  <button class="btn-primary" loading="{{saving}}" bindtap="save">保存</button>
+</view>
+
+<view class="card">
+  <view class="card-title">账号</view>
+  <view class="acc-email">登录账号：{{email}}</view>
+  <view class="acc-hint">与网页版共用同一数据，改一处处处同步</view>
+  <button class="btn-logout" bindtap="logout">退出登录</button>
+</view>

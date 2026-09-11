@@ -20,8 +20,7 @@ export default function ScenarioSim({ settings }) {
   return (
     <section className="card c-sim">
       <div className="card-head">
-        <h2>情景模拟：换个活法，时薪怎么变？</h2>
-        <span className="card-tag">拖动滑块试试</span>
+        <h2>情景模拟</h2>
       </div>
 
       <div className="sim-grid">
@@ -64,10 +63,9 @@ export default function ScenarioSim({ settings }) {
       </div>
 
       <p className="sum-hint">
-        {commuteDelta < 0 && `🚇 每天少通勤 ${-commuteDelta} 分钟，一年约省下 ${((-commuteDelta * 2 * settings.work_days * 12) / 60).toFixed(0)} 小时。`}
-        {overtimeDelta < 0 && ` 🌙 每天少加班 ${-overtimeDelta} 小时，一年拿回 ${(-overtimeDelta * settings.work_days * 12).toFixed(0)} 小时人生。`}
-        {raisePct > 0 && ` 💰 涨薪 ${raisePct}% 大约等于真实时薪提升 ${(((sim.rate - base.rate) / (base.rate || 1)) * 100).toFixed(1)}%。`}
-        {commuteDelta === 0 && overtimeDelta === 0 && raisePct === 0 && '拖动上面的滑块，看看少通勤、少加班、涨工资哪个对真实时薪影响最大。'}
+        {commuteDelta < 0 && `🚇 每天少通勤 ${-commuteDelta} 分钟，一年省下 ${((-commuteDelta * 2 * settings.work_days * 12) / 60).toFixed(0)} 小时。`}
+        {overtimeDelta < 0 && ` 🌙 每天少加班 ${-overtimeDelta} 小时，一年拿回 ${(-overtimeDelta * settings.work_days * 12).toFixed(0)} 小时。`}
+        {raisePct > 0 && ` 💰 涨薪 ${raisePct}% ≈ 真实时薪 +${(((sim.rate - base.rate) / (base.rate || 1)) * 100).toFixed(1)}%。`}
       </p>
     </section>
   )

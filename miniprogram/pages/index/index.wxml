@@ -1,0 +1,47 @@
+<view wx:if="{{err}}" class="card"><view class="err-text">{{err}}</view></view>
+
+<view class="hero">
+  <view class="hero-label">我的真实时薪</view>
+  <view class="hero-rate">{{rateText}}<text class="hero-unit">/小时</text></view>
+  <view class="hero-balance">本月结余 {{balanceText}}</view>
+</view>
+
+<view class="card">
+  <view class="card-title">记一笔</view>
+  <view class="seg">
+    <view class="seg-btn {{kind === 'expense' ? 'on' : ''}}" data-kind="expense" bindtap="setKind">支出</view>
+    <view class="seg-btn {{kind === 'income' ? 'on' : ''}}" data-kind="income" bindtap="setKind">收入</view>
+  </view>
+  <view class="amount-box">
+    <text class="cny">¥</text>
+    <input class="amt" type="digit" value="{{amount}}" bindinput="onAmount" placeholder="0.00" />
+  </view>
+  <view class="cat-grid">
+    <view
+      wx:for="{{catsWithIcon}}"
+      wx:key="name"
+      class="cat-chip {{category === item.name ? 'on' : ''}}"
+      data-name="{{item.name}}"
+      bindtap="setCat"
+    >
+      <text class="ci">{{item.icon}}</text>
+      <text>{{item.name}}</text>
+    </view>
+  </view>
+  <input class="ipt" placeholder="备注（可选）" value="{{note}}" bindinput="onNote" />
+  <button class="btn-primary" loading="{{saving}}" bindtap="save">保存</button>
+</view>
+
+<view class="card">
+  <view class="card-title">最近记录</view>
+  <view wx:if="{{recent.length === 0}}" class="empty">还没有记录，记一笔吧</view>
+  <view wx:for="{{recent}}" wx:key="id" class="tx-row">
+    <text class="tx-avatar">{{item.icon}}</text>
+    <view class="tx-main">
+      <view class="tx-cat">{{item.category}}<text wx:if="{{item.note}}" class="tx-note"> {{item.note}}</text></view>
+      <view class="tx-date">{{item.dateText}}</view>
+    </view>
+    <text class="tx-amount {{item.kind === 'income' ? 'in' : 'out'}}">{{item.sign}}{{item.amountText}}</text>
+    <text class="tx-del" data-id="{{item.id}}" bindtap="del">✕</text>
+  </view>
+</view>

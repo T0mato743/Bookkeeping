@@ -66,5 +66,38 @@ db/schema.sql          建表 SQL（Supabase SQL Editor 执行）
 src/App.jsx            认证、数据加载、Realtime、乐观更新
 src/utils.js           时薪/统计/格式化纯函数
 src/components/        各功能卡片组件
+tests/                 回归测试（单元 + 小程序逻辑 + 云端 E2E）
+miniprogram/           微信小程序版（与网页共用 Supabase 数据）
+deploy/                腾讯云 Windows Server 部署脚本（IIS）
 .env                   Supabase 连接配置
+```
+
+## 测试
+
+```bash
+npm test                # 单元测试（时薪/统计公式）+ 小程序逻辑测试（模拟 wx API）
+node tests/e2e.supabase.mjs   # 云端端到端：注册→设置→增删改查→RLS 匿名隔离
+```
+
+> E2E 会真实注册一个测试账号，受 Supabase 邮件频控限制（约每小时 2 次），失败请隔一小时再跑。
+
+## 微信小程序版
+
+`miniprogram/` 目录是原生微信小程序，**与网页版共用同一个 Supabase 项目和账号体系**：
+网页注册的账号可以直接在小程序登录，两端的记账和设置实时共享同一份数据。
+
+本地运行：
+
+1. 用微信开发者工具「导入项目」选择 `miniprogram/` 目录（AppID 选「测试号」即可）
+2. 详情 → 本地设置 → 勾选「不校验合法域名」（开发阶段）
+3. 正式发布前，在微信公众平台 → 开发管理 → 服务器域名，把
+   `https://hjcdzoxwkaxikfrbhgry.supabase.co` 加入 **request 合法域名**，并注册自己的 AppID
+
+## 服务器部署（腾讯云 Windows Server + IIS）
+
+站点根目录为 `C:\www\workbuddy`，更新版本：
+
+```bash
+npm run build
+scp -r -i %USERPROFILE%\.ssh\tencent_deploy dist\* Administrator@203.195.191.187:C:/www/workbuddy/
 ```
