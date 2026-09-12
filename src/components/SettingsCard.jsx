@@ -12,6 +12,7 @@ const FIELDS = [
   { key: 'overtime_hours', label: '每日加班小时', step: 0.5, min: 0 },
   { key: 'freedom_target', label: '自由基金目标 (¥)', step: 10000, min: 0 },
   { key: 'safety_target', label: '安全垫目标 (¥)', step: 5000, min: 0 },
+  { key: 'budget_monthly', label: '月度预算上限 (¥)', step: 500, min: 0 },
 ]
 
 export default function SettingsCard({ settings, onWriteError }) {

@@ -1,8 +1,9 @@
-import { currentMonth, monthSummary, fmtMoney } from '../utils'
+import { currentMonth, monthSummary, fmtMoney, budgetState } from '../utils'
 
-export default function MonthlySummary({ transactions }) {
+export default function MonthlySummary({ transactions, settings }) {
   const m = monthSummary(transactions, currentMonth())
   const [y, mo] = currentMonth().split('-')
+  const budget = budgetState(settings?.budget_monthly, m.fixed + m.flexible)
 
   return (
     <section className="card c-summary">
@@ -28,6 +29,26 @@ export default function MonthlySummary({ transactions }) {
           <span className={`sum-val ${m.balance >= 0 ? 'in' : 'out'}`}>{fmtMoney(m.balance, 0)}</span>
         </div>
       </div>
+
+      {!budget.off && (
+        <div className={`budget-box ${budget.level}`}>
+          <div className="fund-line">
+            <span>月度预算</span>
+            <b>{budget.pct.toFixed(0)}%</b>
+          </div>
+          <div className="bar">
+            <div
+              className={`bar-fill budget-${budget.level}`}
+              style={{ width: `${Math.min(100, budget.pct)}%` }}
+            />
+          </div>
+          <div className="fund-sub">
+            已花 {fmtMoney(m.fixed + m.flexible, 0)} / {fmtMoney(Number(settings.budget_monthly), 0)}
+            {budget.level === 'over' && <span className="budget-alert"> · 已超支 {fmtMoney(-budget.remain, 0)}！</span>}
+            {budget.level === 'warn' && <span className="budget-warn"> · 只剩 {fmtMoney(budget.remain, 0)}</span>}
+          </div>
+        </div>
+      )}
     </section>
   )
 }

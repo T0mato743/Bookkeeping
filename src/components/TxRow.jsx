@@ -2,42 +2,8 @@ import { useState } from 'react'
 import { supabase } from '../supabaseClient'
 import { fmtMoney, catIcon, EXPENSE_CATEGORIES, INCOME_CATEGORIES } from '../utils'
 
-export default function RecentList({ transactions, loading, markTxLocal, removeTxLocal, onWriteError }) {
-  if (loading) {
-    return (
-      <section className="card c-recent">
-        <div className="card-head"><h2>最近</h2></div>
-        <div className="skel" style={{ height: 52 }} />
-        <div className="skel" style={{ height: 52 }} />
-        <div className="skel" style={{ height: 52 }} />
-      </section>
-    )
-  }
-
-  const recent = transactions.slice(0, 4)
-
-  return (
-    <section className="card c-recent">
-      <div className="card-head">
-        <h2>最近</h2>
-        <button className="link-btn" onClick={() => document.querySelector('.c-summary')?.scrollIntoView({ behavior: 'smooth' })}>
-          本月汇总 ↓
-        </button>
-      </div>
-      {recent.length === 0 ? (
-        <div className="empty">还没有记录，记一笔吧</div>
-      ) : (
-        <ul className="tx-list">
-          {recent.map((t) => (
-            <TxRow key={t.id} tx={t} markTxLocal={markTxLocal} removeTxLocal={removeTxLocal} onWriteError={onWriteError} />
-          ))}
-        </ul>
-      )}
-    </section>
-  )
-}
-
-function TxRow({ tx, markTxLocal, removeTxLocal, onWriteError }) {
+// 单条记录行：编辑 / 删除，供「记录」列表复用
+export default function TxRow({ tx, markTxLocal, removeTxLocal, onWriteError }) {
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState(null)
 
@@ -123,7 +89,10 @@ function TxRow({ tx, markTxLocal, removeTxLocal, onWriteError }) {
         <>
           <span className="tx-avatar">{catIcon(tx.category)}</span>
           <div className="tx-main">
-            <span className="tx-cat">{tx.category}</span>
+            <span className="tx-cat">
+              {tx.category}
+              {tx.rule_id && <span className="tx-badge">周期</span>}
+            </span>
             {tx.note && <span className="tx-note">{tx.note}</span>}
             <span className="tx-date">{date}</span>
           </div>

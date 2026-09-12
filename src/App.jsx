@@ -4,9 +4,12 @@ import { computeRealHourly, monthSummary, totalBalance, currentMonth, fmtMoney, 
 import AuthView from './components/AuthView'
 import SettingsCard from './components/SettingsCard'
 import QuickAdd from './components/QuickAdd'
-import RecentList from './components/RecentList'
+import Records from './components/Records'
+import RecurringCard from './components/RecurringCard'
 import MonthlySummary from './components/MonthlySummary'
 import FreedomFund from './components/FreedomFund'
+import CategoryPie from './components/CategoryPie'
+import WeeklyTrend from './components/WeeklyTrend'
 import SavingsChart from './components/SavingsChart'
 import ScenarioSim from './components/ScenarioSim'
 
@@ -18,6 +21,7 @@ export default function App() {
   const [transactions, setTransactions] = useState([])
   const [settings, setSettings] = useState(null)
   const [writeErr, setWriteErr] = useState(null) // { msg, retry }
+  const [migrationNeeded, setMigrationNeeded] = useState(false)
   const [synced, setSynced] = useState(false)
 
   // ---------- 认证 ----------
@@ -36,19 +40,22 @@ export default function App() {
   const loadAll = useCallback(async (uid) => {
     setLoadState('loading')
     setLoadErr('')
+    const fetchTx = () =>
+      supabase
+        .from('transactions')
+        .select('*')
+        .order('occurred_at', { ascending: false })
+        .order('created_at', { ascending: false })
+        .limit(1000)
     try {
       const [txRes, setRes] = await Promise.all([
-        supabase
-          .from('transactions')
-          .select('*')
-          .order('occurred_at', { ascending: false })
-          .order('created_at', { ascending: false })
-          .limit(1000),
+        fetchTx(),
         supabase.from('user_settings').select('*').eq('user_id', uid).maybeSingle(),
       ])
       if (txRes.error) throw txRes.error
       if (setRes.error) throw setRes.error
-      setTransactions(txRes.data || [])
+      let txList = txRes.data || []
+
       if (setRes.data) {
         setSettings(setRes.data)
       } else {
@@ -61,6 +68,22 @@ export default function App() {
         if (insErr) throw insErr
         setSettings(created)
       }
+
+      // 周期记账：打开时补齐到期的固定收支（云端函数保证幂等）
+      let mig = false
+      try {
+        const { data: gen, error: rpcErr } = await supabase.rpc('run_recurring', { p_user: uid })
+        if (rpcErr) {
+          mig = true
+        } else if (gen > 0) {
+          const again = await fetchTx()
+          if (!again.error) txList = again.data
+        }
+      } catch {
+        mig = true
+      }
+      setMigrationNeeded(mig)
+      setTransactions(txList)
       setSynced(true)
       setLoadState('ready')
     } catch (e) {
@@ -150,7 +173,7 @@ export default function App() {
         <div className="grid">
           <SkeletonCard h={260} cls="c-hourly" />
           <SkeletonCard h={260} cls="c-add" />
-          <SkeletonCard h={200} cls="c-recent" />
+          <SkeletonCard h={200} cls="c-records" />
           <SkeletonCard h={200} cls="c-summary" />
         </div>
       </div>
@@ -217,6 +240,12 @@ export default function App() {
         </div>
       )}
 
+      {migrationNeeded && (
+        <div className="banner banner-warn">
+          <span>数据库需要升级（周期记账/预算不可用）：请在 Supabase SQL Editor 执行 db/migration-2.sql</span>
+        </div>
+      )}
+
       <main className="grid">
         {loading || !settings
           ? skeleton('c-hourly', 340)
@@ -233,7 +262,7 @@ export default function App() {
               onWriteError={reportWriteError}
             />}
 
-        <RecentList
+        <Records
           transactions={transactions}
           loading={loading}
           markTxLocal={markTxLocal}
@@ -241,11 +270,21 @@ export default function App() {
           onWriteError={reportWriteError}
         />
 
-        {loading ? skeleton('c-summary', 220) : <MonthlySummary transactions={transactions} />}
+        {loading || !settings
+          ? skeleton('c-summary', 220)
+          : <MonthlySummary transactions={transactions} settings={settings} />}
+
+        {loading || !settings
+          ? skeleton('c-recurring', 200)
+          : <RecurringCard userId={uid} onWriteError={reportWriteError} migrationNeeded={migrationNeeded} />}
 
         {loading || !settings
           ? skeleton('c-fund', 220)
           : <FreedomFund transactions={transactions} settings={settings} />}
+
+        {loading ? skeleton('c-pie', 280) : <CategoryPie transactions={transactions} month={currentMonth()} />}
+
+        {loading ? skeleton('c-weekly', 280) : <WeeklyTrend transactions={transactions} />}
 
         {loading || !settings
           ? skeleton('c-chart', 320)
