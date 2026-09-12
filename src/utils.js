@@ -12,7 +12,7 @@ export const EXPENSE_CATEGORIES = [
 export const INCOME_CATEGORIES = ['工资', '加班费', '兼职', '理财收益', '报销', '其他']
 
 export const CATEGORY_ICONS = {
-  餐饮: 'ri-restaurant-line', 交通: 'ri-train-line', 房租: 'ri-home-4-line', 水电煤: 'ri-lightning-line',
+  餐饮: 'ri-restaurant-line', 交通: 'ri-train-line', 房租: 'ri-home-4-line', 水电煤: 'ri-plug-line',
   话费网费: 'ri-wifi-line', 订阅服务: 'ri-tv-line', 购物: 'ri-shopping-bag-3-line', 娱乐: 'ri-gamepad-line',
   医疗: 'ri-capsule-line', 健身: 'ri-run-line', 保险: 'ri-shield-check-line', 人情: 'ri-gift-line',
   其他: 'ri-file-list-3-line', 工资: 'ri-wallet-3-line', 加班费: 'ri-moon-line', 兼职: 'ri-briefcase-line',

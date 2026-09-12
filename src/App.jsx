@@ -14,6 +14,13 @@ import WeeklyTrend from './components/WeeklyTrend'
 import SavingsChart from './components/SavingsChart'
 import ScenarioSim from './components/ScenarioSim'
 
+const TABS = [
+  { key: 'home', label: '首页', icon: 'ri-home-5-line', activeIcon: 'ri-home-5-fill' },
+  { key: 'stats', label: '统计', icon: 'ri-bar-chart-grouped-line', activeIcon: 'ri-bar-chart-grouped-fill' },
+  { key: 'plan', label: '规划', icon: 'ri-calendar-todo-line', activeIcon: 'ri-calendar-todo-fill' },
+  { key: 'settings', label: '设置', icon: 'ri-settings-4-line', activeIcon: 'ri-settings-4-fill' },
+]
+
 export default function App() {
   const [session, setSession] = useState(null)
   const [authReady, setAuthReady] = useState(false)
@@ -24,6 +31,7 @@ export default function App() {
   const [writeErr, setWriteErr] = useState(null) // { msg, retry }
   const [migrationNeeded, setMigrationNeeded] = useState(false)
   const [synced, setSynced] = useState(false)
+  const [view, setView] = useState('home')
   const { theme, setTheme } = useTheme()
 
   // ---------- 认证 ----------
@@ -173,10 +181,8 @@ export default function App() {
       <div className="app">
         <div className="hero skel-hero" />
         <div className="grid">
-          <SkeletonCard h={260} cls="c-hourly" />
           <SkeletonCard h={260} cls="c-add" />
-          <SkeletonCard h={200} cls="c-records" />
-          <SkeletonCard h={200} cls="c-summary" />
+          <SkeletonCard h={260} cls="c-records" />
         </div>
       </div>
     )
@@ -201,6 +207,18 @@ export default function App() {
           打工人小账本
           <span className={`sync-dot ${synced ? 'on' : ''}`} title={synced ? '云端已同步' : '同步中'} />
         </div>
+        <nav className="tabs-top">
+          {TABS.map((t) => (
+            <button
+              key={t.key}
+              className={`tab-pill ${view === t.key ? 'on' : ''}`}
+              onClick={() => setView(t.key)}
+            >
+              <i className={view === t.key ? t.activeIcon : t.icon} />
+              {t.label}
+            </button>
+          ))}
+        </nav>
         <div className="topbar-right">
           <span className="user-email">{session.user.email}</span>
           <button
@@ -213,33 +231,6 @@ export default function App() {
           <button className="btn-ghost" onClick={signOut}>退出</button>
         </div>
       </header>
-
-      {/* 英雄区：真实时薪 + 关键数字 */}
-      {loading || !settings ? (
-        <div className="hero skel-hero" />
-      ) : (
-        <section className="hero">
-          <div className="hero-label">我的真实时薪</div>
-          <div className="hero-rate">
-            {fmtMoney(rate)}
-            <span className="hero-unit">/小时</span>
-          </div>
-          <div className="hero-stats">
-            <div className="hero-stat">
-              <span className="hs-label">本月结余</span>
-              <span className={`hs-val ${mBalance >= 0 ? '' : 'neg'}`}>{fmtMoney(mBalance, 0)}</span>
-            </div>
-            <div className="hero-stat">
-              <span className="hs-label">累计结余</span>
-              <span className={`hs-val ${total >= 0 ? '' : 'neg'}`}>{fmtMoney(total, 0)}</span>
-            </div>
-            <div className="hero-stat">
-              <span className="hs-label">安全垫</span>
-              <span className="hs-val">{cushion == null ? '—' : fmtHours(cushion)}</span>
-            </div>
-          </div>
-        </section>
-      )}
 
       {loadState === 'error' && (
         <div className="banner banner-err">
@@ -256,55 +247,116 @@ export default function App() {
         </div>
       )}
 
-      <main className="grid">
-        {loading || !settings
-          ? skeleton('c-hourly', 340)
-          : <SettingsCard settings={settings} onWriteError={reportWriteError} />}
+      {/* ---------- 首页 ---------- */}
+      {view === 'home' && (
+        <main className="grid view">
+          {loading || !settings ? (
+            <div className="hero skel-hero" />
+          ) : (
+            <section className="hero">
+              <div className="hero-label">我的真实时薪</div>
+              <div className="hero-rate">
+                {fmtMoney(rate)}
+                <span className="hero-unit">/小时</span>
+              </div>
+              <div className="hero-stats">
+                <div className="hero-stat">
+                  <span className="hs-label">本月结余</span>
+                  <span className={`hs-val ${mBalance >= 0 ? '' : 'neg'}`}>{fmtMoney(mBalance, 0)}</span>
+                </div>
+                <div className="hero-stat">
+                  <span className="hs-label">累计结余</span>
+                  <span className={`hs-val ${total >= 0 ? '' : 'neg'}`}>{fmtMoney(total, 0)}</span>
+                </div>
+                <div className="hero-stat">
+                  <span className="hs-label">安全垫</span>
+                  <span className="hs-val">{cushion == null ? '—' : fmtHours(cushion)}</span>
+                </div>
+              </div>
+            </section>
+          )}
 
-        {loading || !settings
-          ? skeleton('c-add', 340)
-          : <QuickAdd
-              userId={uid}
-              settings={settings}
-              addTxLocal={addTxLocal}
-              replaceTxLocal={replaceTxLocal}
-              removeTxLocal={removeTxLocal}
-              onWriteError={reportWriteError}
-            />}
+          {loading || !settings
+            ? skeleton('c-add', 380)
+            : <QuickAdd
+                userId={uid}
+                settings={settings}
+                addTxLocal={addTxLocal}
+                replaceTxLocal={replaceTxLocal}
+                removeTxLocal={removeTxLocal}
+                onWriteError={reportWriteError}
+              />}
 
-        <Records
-          userId={uid}
-          transactions={transactions}
-          loading={loading}
-          markTxLocal={markTxLocal}
-          removeTxLocal={removeTxLocal}
-          onWriteError={reportWriteError}
-        />
+          <Records
+            userId={uid}
+            transactions={transactions}
+            loading={loading}
+            markTxLocal={markTxLocal}
+            removeTxLocal={removeTxLocal}
+            onWriteError={reportWriteError}
+            compact
+          />
+        </main>
+      )}
 
-        {loading || !settings
-          ? skeleton('c-summary', 220)
-          : <MonthlySummary transactions={transactions} settings={settings} />}
+      {/* ---------- 统计 ---------- */}
+      {view === 'stats' && (
+        <main className="grid view">
+          {loading || !settings
+            ? skeleton('c-summary', 220)
+            : <MonthlySummary transactions={transactions} settings={settings} />}
 
-        {loading || !settings
-          ? skeleton('c-recurring', 200)
-          : <RecurringCard userId={uid} onWriteError={reportWriteError} migrationNeeded={migrationNeeded} />}
+          {loading ? skeleton('c-pie', 260) : <CategoryPie transactions={transactions} month={currentMonth()} />}
 
-        {loading || !settings
-          ? skeleton('c-fund', 220)
-          : <FreedomFund transactions={transactions} settings={settings} />}
+          {loading ? skeleton('c-weekly', 280) : <WeeklyTrend transactions={transactions} />}
 
-        {loading ? skeleton('c-pie', 280) : <CategoryPie transactions={transactions} month={currentMonth()} />}
+          {loading || !settings
+            ? skeleton('c-chart', 300)
+            : <SavingsChart transactions={transactions} settings={settings} />}
+        </main>
+      )}
 
-        {loading ? skeleton('c-weekly', 280) : <WeeklyTrend transactions={transactions} />}
+      {/* ---------- 规划 ---------- */}
+      {view === 'plan' && (
+        <main className="grid view">
+          {loading || !settings
+            ? skeleton('c-recurring', 220)
+            : <RecurringCard userId={uid} onWriteError={reportWriteError} migrationNeeded={migrationNeeded} />}
 
-        {loading || !settings
-          ? skeleton('c-chart', 320)
-          : <SavingsChart transactions={transactions} settings={settings} />}
+          {loading || !settings
+            ? skeleton('c-fund', 220)
+            : <FreedomFund transactions={transactions} settings={settings} />}
 
-        {loading || !settings
-          ? skeleton('c-sim', 240)
-          : <ScenarioSim settings={settings} />}
-      </main>
+          {loading || !settings
+            ? skeleton('c-sim', 240)
+            : <ScenarioSim settings={settings} />}
+        </main>
+      )}
+
+      {/* ---------- 设置 ---------- */}
+      {view === 'settings' && (
+        <main className="grid view">
+          {loading || !settings
+            ? skeleton('c-hourly', 340)
+            : <SettingsCard settings={settings} onWriteError={reportWriteError} />}
+
+          <PreferencesCard session={session} theme={theme} setTheme={setTheme} signOut={signOut} />
+        </main>
+      )}
+
+      {/* 移动端底部导航 */}
+      <nav className="tabbar-bottom">
+        {TABS.map((t) => (
+          <button
+            key={t.key}
+            className={`tabbar-item ${view === t.key ? 'on' : ''}`}
+            onClick={() => setView(t.key)}
+          >
+            <i className={view === t.key ? t.activeIcon : t.icon} />
+            <span>{t.label}</span>
+          </button>
+        ))}
+      </nav>
 
       {writeErr && (
         <div className="toast">
@@ -319,6 +371,45 @@ export default function App() {
         </div>
       )}
     </div>
+  )
+}
+
+function PreferencesCard({ session, theme, setTheme, signOut }) {
+  return (
+    <section className="card c-prefs">
+      <div className="card-head"><h2>偏好与账号</h2></div>
+
+      <div className="pref-row">
+        <span className="pref-label"><i className="ri-contrast-2-line pref-ic" /> 外观</span>
+        <div className="seg pref-seg">
+          <button className={`seg-btn ${theme === 'light' ? 'on' : ''}`} onClick={() => setTheme('light')}>
+            <i className="ri-sun-line" /> 亮色
+          </button>
+          <button className={`seg-btn ${theme === 'dark' ? 'on' : ''}`} onClick={() => setTheme('dark')}>
+            <i className="ri-moon-line" /> 深色
+          </button>
+        </div>
+      </div>
+
+      <div className="pref-row">
+        <span className="pref-label"><i className="ri-user-3-line pref-ic" /> 账号</span>
+        <span className="pref-val">{session.user.email}</span>
+      </div>
+
+      <div className="pref-row">
+        <span className="pref-label"><i className="ri-database-2-line pref-ic" /> 数据</span>
+        <span className="pref-val">CSV 导入 / 导出在「首页 → 记录」卡片右上角</span>
+      </div>
+
+      <div className="pref-row">
+        <span className="pref-label"><i className="ri-refresh-line pref-ic" /> 同步</span>
+        <span className="pref-val">云端实时同步，多设备登录同一账号自动一致</span>
+      </div>
+
+      <button className="btn-logout" onClick={signOut}>
+        <i className="ri-logout-box-r-line" /> 退出登录
+      </button>
+    </section>
   )
 }
 

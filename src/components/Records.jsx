@@ -9,7 +9,7 @@ import TxRow from './TxRow'
 import MonthSelect from './MonthSelect'
 
 // 记录列表：搜索 + 按月筛选 + CSV 导出
-export default function Records({ userId, transactions, loading, markTxLocal, removeTxLocal, onWriteError }) {
+export default function Records({ userId, transactions, loading, markTxLocal, removeTxLocal, onWriteError, compact = false }) {
   const [q, setQ] = useState('')
   const [month, setMonth] = useState('all')
   const [kind, setKind] = useState('all')
@@ -162,7 +162,7 @@ export default function Records({ userId, transactions, loading, markTxLocal, re
       {filtered.length === 0 ? (
         <div className="empty">{filtering ? '没有符合条件的记录' : '还没有记录，记一笔吧'}</div>
       ) : (
-        <ul className="tx-list">
+        <ul className={`tx-list ${compact ? 'tx-scroll' : ''}`}>
           {shown.map((t) => (
             <TxRow key={t.id} tx={t} markTxLocal={markTxLocal} removeTxLocal={removeTxLocal} onWriteError={onWriteError} />
           ))}

@@ -124,6 +124,57 @@ body {
   white-space: nowrap;
 }
 
+[data-theme="dark"] .hero {
+  background: linear-gradient(135deg, #0f5148, #0b3f3b 55%, #092e2a);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
+}
+
+/* ---------- 顶栏导航 ---------- */
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 2px;
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  background: var(--bg);
+}
+
+.tabs-top {
+  display: flex;
+  gap: 4px;
+  margin: 0 auto;
+  background: var(--soft2);
+  border-radius: 12px;
+  padding: 3px;
+}
+
+.tab-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: 13.5px;
+  color: var(--muted);
+  padding: 7px 18px;
+  border-radius: 10px;
+  cursor: pointer;
+  min-height: 36px;
+  transition: color 0.15s, background 0.15s;
+}
+
+.tab-pill i { font-size: 16px; }
+
+.tab-pill.on {
+  background: var(--surface);
+  color: var(--brand-deep);
+  font-weight: 700;
+  box-shadow: var(--shadow);
+}
+
 .theme-btn {
   border: 1px solid var(--border);
   background: var(--surface);
@@ -131,6 +182,7 @@ body {
   height: 32px;
   border-radius: 50%;
   opacity: 1;
+  flex-shrink: 0;
 }
 
 .theme-btn i {
@@ -140,8 +192,14 @@ body {
 
 .theme-btn:hover i { color: var(--ink); }
 
+/* 移动端底部导航 */
+.tabbar-bottom {
+  display: none;
+}
+
 /* ---------- 英雄区 ---------- */
 .hero {
+  grid-column: span 12;
   background: linear-gradient(135deg, var(--brand-deep), var(--brand-ink) 55%, #0b3f3b);
   color: #fff;
   border-radius: 20px;
@@ -219,18 +277,19 @@ body {
 }
 
 .c-hourly    { grid-column: span 7; }
+.c-prefs     { grid-column: span 5; }
 .c-add       { grid-column: span 5; }
 .c-records   { grid-column: span 7; }
-.c-summary   { grid-column: span 5; }
+.c-summary   { grid-column: span 6; }
 .c-recurring { grid-column: span 7; }
 .c-fund      { grid-column: span 5; }
-.c-pie       { grid-column: span 5; }
-.c-weekly    { grid-column: span 7; }
-.c-chart     { grid-column: span 12; }
+.c-pie       { grid-column: span 6; }
+.c-weekly    { grid-column: span 6; }
+.c-chart     { grid-column: span 6; }
 .c-sim       { grid-column: span 12; }
 
 @media (max-width: 860px) {
-  .c-hourly, .c-add, .c-records, .c-summary, .c-recurring, .c-fund, .c-pie, .c-weekly, .c-chart, .c-sim {
+  .c-hourly, .c-prefs, .c-add, .c-records, .c-summary, .c-recurring, .c-fund, .c-pie, .c-weekly, .c-chart, .c-sim {
     grid-column: span 12;
   }
   .hero-rate { font-size: 34px; }
@@ -1410,3 +1469,144 @@ body {
   .tx-note { max-width: 130px; }
   .sim-result { gap: 12px; padding: 12px 14px; }
 }
+
+/* ---------- Tab 多视图 ---------- */
+.view {
+  animation: fadein 0.22s ease;
+}
+
+/* 记录列表卡片内滚动，减少页面滚动 */
+.tx-scroll {
+  max-height: 420px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-right: 4px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--switch-off) transparent;
+}
+
+.tx-scroll::-webkit-scrollbar { width: 6px; }
+.tx-scroll::-webkit-scrollbar-thumb {
+  background: var(--switch-off);
+  border-radius: 999px;
+}
+
+@media (max-width: 860px) {
+  .tx-scroll { max-height: 330px; }
+}
+
+/* 桌面端：设置页参数 5 列排布，压缩高度 */
+@media (min-width: 1100px) {
+  .field-grid { grid-template-columns: repeat(5, 1fr); }
+}
+
+/* ---------- 移动端底部导航 ---------- */
+@media (max-width: 860px) {
+  .tabs-top { display: none; }
+
+  .topbar {
+    padding: 10px 2px;
+  }
+
+  .app {
+    padding-bottom: 76px;
+  }
+
+  .tabbar-bottom {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    background: var(--card);
+    border-top: 1px solid var(--border);
+    padding: 6px 10px calc(6px + env(safe-area-inset-bottom));
+    z-index: 60;
+    box-shadow: 0 -4px 16px rgba(22, 35, 46, 0.08);
+  }
+
+  .tabbar-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    border: none;
+    background: transparent;
+    font-family: inherit;
+    font-size: 11px;
+    color: var(--muted);
+    padding: 4px 0;
+    cursor: pointer;
+  }
+
+  .tabbar-item i { font-size: 21px; }
+
+  .tabbar-item.on {
+    color: var(--brand);
+    font-weight: 700;
+  }
+}
+
+@media (min-width: 861px) {
+  .tabbar-bottom { display: none; }
+}
+
+/* ---------- 偏好卡 ---------- */
+.pref-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--track);
+}
+
+.pref-row:last-of-type { border-bottom: none; }
+
+.pref-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13.5px;
+  font-weight: 700;
+  width: 96px;
+  flex-shrink: 0;
+}
+
+.pref-ic { font-size: 16px; color: var(--brand); }
+
+.pref-val {
+  color: var(--muted);
+  font-size: 13px;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pref-seg { margin-bottom: 0; min-width: 220px; }
+
+.pref-seg .seg-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+
+.btn-logout {
+  width: 100%;
+  margin-top: 14px;
+  background: transparent;
+  color: var(--red);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  font-size: 14px;
+  font-family: inherit;
+  padding: 10px 0;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.btn-logout:hover { border-color: var(--red); background: var(--red-weak); }

@@ -3,9 +3,10 @@ import { supabase } from '../supabaseClient'
 import { fmtMoney, catIcon, nextOccurrenceText, EXPENSE_CATEGORIES, INCOME_CATEGORIES } from '../utils'
 
 // 周期自动记账：房租/工资等每月固定收支，云端函数自动补账
-export default function RecurringCard({ userId, onWriteError, migrationNeeded }) {
-  const [rules, setRules] = useState([])
-  const [loading, setLoading] = useState(true)
+// rulesOverride 仅用于 UI 预览（preview.html），正常运行时传 undefined
+export default function RecurringCard({ userId, onWriteError, migrationNeeded, rulesOverride }) {
+  const [rules, setRules] = useState(rulesOverride || [])
+  const [loading, setLoading] = useState(!rulesOverride)
   const [showForm, setShowForm] = useState(false)
   const [form, setForm] = useState({ kind: 'expense', amount: '', category: '房租', note: '', day: 1 })
   const [busy, setBusy] = useState(false)
@@ -13,7 +14,7 @@ export default function RecurringCard({ userId, onWriteError, migrationNeeded })
   const [editDraft, setEditDraft] = useState(null)
 
   useEffect(() => {
-    load()
+    if (!rulesOverride) load()
   }, [])
 
   async function load() {
