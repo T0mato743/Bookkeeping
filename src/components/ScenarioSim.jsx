@@ -63,9 +63,9 @@ export default function ScenarioSim({ settings }) {
       </div>
 
       <p className="sum-hint">
-        {commuteDelta < 0 && `🚇 每天少通勤 ${-commuteDelta} 分钟，一年省下 ${((-commuteDelta * 2 * settings.work_days * 12) / 60).toFixed(0)} 小时。`}
-        {overtimeDelta < 0 && ` 🌙 每天少加班 ${-overtimeDelta} 小时，一年拿回 ${(-overtimeDelta * settings.work_days * 12).toFixed(0)} 小时。`}
-        {raisePct > 0 && ` 💰 涨薪 ${raisePct}% ≈ 真实时薪 +${(((sim.rate - base.rate) / (base.rate || 1)) * 100).toFixed(1)}%。`}
+        {commuteDelta < 0 && <><i className="ri-train-line hi-ic" /> 每天少通勤 {-commuteDelta} 分钟，一年省下 {((-commuteDelta * 2 * settings.work_days * 12) / 60).toFixed(0)} 小时。</>}
+        {overtimeDelta < 0 && <><i className="ri-moon-line hi-ic" /> 每天少加班 {-overtimeDelta} 小时，一年拿回 {(-overtimeDelta * settings.work_days * 12).toFixed(0)} 小时。</>}
+        {raisePct > 0 && <><i className="ri-money-cny-circle-line hi-ic" /> 涨薪 {raisePct}% ≈ 真实时薪 +{(((sim.rate - base.rate) / (base.rate || 1)) * 100).toFixed(1)}%。</>}
       </p>
     </section>
   )

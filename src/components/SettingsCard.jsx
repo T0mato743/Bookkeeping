@@ -83,8 +83,11 @@ export default function SettingsCard({ settings, onWriteError }) {
         ))}
       </div>
 
-      <details className="formula" open>
-        <summary>展开公式</summary>
+      <details className="formula">
+        <summary>
+          展开时薪计算公式
+          <i className="ri-arrow-down-s-line f-arrow" />
+        </summary>
         <div className="formula-body">
           <div className="formula-line">
             年到手收入 = {fmtMoney(draft.net_monthly, 0)} × {draft.pay_months} 个月 = <b>{fmtMoney(calc.annualIncome, 0)}</b>

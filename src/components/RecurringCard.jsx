@@ -164,7 +164,7 @@ export default function RecurringCard({ userId, onWriteError, migrationNeeded })
         <ul className="rule-list">
           {rules.map((r) => (
             <li key={r.id} className={`rule-row ${r.active ? '' : 'off'}`}>
-              <span className="tx-avatar">{catIcon(r.category)}</span>
+              <span className="tx-avatar"><i className={catIcon(r.category)} /></span>
               <div className="tx-main">
                 <span className="tx-cat">
                   {r.category}

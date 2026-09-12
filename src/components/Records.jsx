@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react'
 import { supabase } from '../supabaseClient'
-import { fmtMoney, catIcon, buildMonthOptions, filterTransactions, buildCsv, downloadCsv } from '../utils'
+import { fmtMoney, buildMonthOptions, filterTransactions, buildCsv, downloadCsv } from '../utils'
 import TxRow from './TxRow'
+import MonthSelect from './MonthSelect'
 
 // 记录列表：搜索 + 按月筛选 + CSV 导出
 export default function Records({ transactions, loading, markTxLocal, removeTxLocal, onWriteError }) {
@@ -57,24 +58,23 @@ export default function Records({ transactions, loading, markTxLocal, removeTxLo
       <div className="card-head">
         <h2>记录</h2>
         <button className="link-btn" onClick={exportCsv} disabled={exporting}>
+          <i className="ri-download-2-line" />
           {exporting ? '导出中…' : '导出 CSV'}
         </button>
       </div>
 
       <div className="filter-row">
-        <input
-          className="search-input"
-          type="text"
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          placeholder="🔍 搜索分类或备注"
-        />
-        <select className="month-select" value={month} onChange={(e) => setMonth(e.target.value)}>
-          <option value="all">全部月份</option>
-          {months.map((m) => (
-            <option key={m} value={m}>{m}</option>
-          ))}
-        </select>
+        <div className="search-wrap">
+          <i className="ri-search-line search-ic" />
+          <input
+            className="search-input"
+            type="text"
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="搜索分类或备注"
+          />
+        </div>
+        <MonthSelect value={month} options={months} onChange={setMonth} />
       </div>
       <div className="kind-row">
         {[['all', '全部'], ['expense', '支出'], ['income', '收入']].map(([v, label]) => (

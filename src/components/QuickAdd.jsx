@@ -112,7 +112,7 @@ export default function QuickAdd({ userId, settings, addTxLocal, replaceTxLocal,
             className={`cat-chip ${category === c ? 'on' : ''}`}
             onClick={() => setCategory(c)}
           >
-            <span className="cat-icon">{catIcon(c)}</span>
+            <i className={`cat-icon ${catIcon(c)}`} />
             {c}
           </button>
         ))}

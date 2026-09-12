@@ -195,7 +195,8 @@ export default function App() {
     <div className="app">
       <header className="topbar">
         <div className="topbar-title">
-          ⏱️ 打工人小账本
+          <i className="ri-timer-flash-line topbar-logo" />
+          打工人小账本
           <span className={`sync-dot ${synced ? 'on' : ''}`} title={synced ? '云端已同步' : '同步中'} />
         </div>
         <div className="topbar-right">
@@ -297,7 +298,8 @@ export default function App() {
 
       {writeErr && (
         <div className="toast">
-          <span>⚠️ 保存失败：{writeErr.msg}</span>
+          <i className="ri-error-warning-line toast-ic" />
+          <span>保存失败：{writeErr.msg}</span>
           <div className="banner-actions">
             <button className="btn-small toast-btn" onClick={() => { const r = writeErr.retry; setWriteErr(null); r && r() }}>
               重试

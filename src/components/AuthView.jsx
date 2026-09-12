@@ -55,7 +55,7 @@ export default function AuthView() {
   return (
     <div className="auth-wrap">
       <form className="card auth-card" onSubmit={submit}>
-        <div className="auth-logo">⏱️</div>
+        <div className="auth-logo"><i className="ri-timer-flash-fill" /></div>
         <h1 className="auth-title">打工人小账本</h1>
         <p className="auth-sub">算清真实时薪，把每一笔钱换算成生命时间</p>
 

@@ -87,7 +87,7 @@ export default function TxRow({ tx, markTxLocal, removeTxLocal, onWriteError }) 
         </div>
       ) : (
         <>
-          <span className="tx-avatar">{catIcon(tx.category)}</span>
+          <span className="tx-avatar"><i className={catIcon(tx.category)} /></span>
           <div className="tx-main">
             <span className="tx-cat">
               {tx.category}
@@ -101,14 +101,12 @@ export default function TxRow({ tx, markTxLocal, removeTxLocal, onWriteError }) 
               {isIncome ? '+' : '−'}{fmtMoney(tx.amount)}
             </span>
             <span className="tx-actions">
-              <button
-                className="icon-btn"
-                title="编辑"
-                onClick={() => { setDraft({ amount: tx.amount, category: tx.category, note: tx.note, kind: tx.kind }); setEditing(true) }}
-              >
-                ✏️
+              <button className="icon-btn" title="编辑" onClick={() => { setDraft({ amount: tx.amount, category: tx.category, note: tx.note, kind: tx.kind }); setEditing(true) }}>
+                <i className="ri-pencil-line" />
               </button>
-              <button className="icon-btn" title="删除" onClick={del}>🗑️</button>
+              <button className="icon-btn" title="删除" onClick={del}>
+                <i className="ri-delete-bin-line" />
+              </button>
             </span>
           </div>
           {tx._pending && <span className="pending-dot" title="同步中…">◌</span>}

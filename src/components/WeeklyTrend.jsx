@@ -59,7 +59,7 @@ export default function WeeklyTrend({ transactions }) {
         })}
       </svg>
       <ul className="trend-lines">
-        {lines.map((l) => <li key={l}>{l}</li>)}
+        {lines.map((l) => <li key={l}><i className="ri-arrow-right-s-line tl-ic" />{l}</li>)}
       </ul>
     </section>
   )
