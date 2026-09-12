@@ -719,6 +719,11 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
+/* ---------- ECharts 图表容器 ---------- */
+.echart-box {
+  width: 100%;
+}
+
 /* ---------- SVG 图表 ---------- */
 .chart-svg {
   width: 100%;
