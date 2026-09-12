@@ -1,6 +1,8 @@
 :root {
+  color-scheme: light;
   --bg: #f2f4f7;
   --card: #ffffff;
+  --surface: #ffffff;
   --ink: #16232e;
   --muted: #7b8794;
   --brand: #0f766e;
@@ -13,8 +15,44 @@
   --red-weak: #fdeef2;
   --amber: #d97706;
   --border: #e6e9ee;
+  --input-bg: var(--input-bg);
+  --soft: var(--soft);
+  --soft2: var(--soft2);
+  --track: var(--track);
+  --hover: var(--hover);
+  --switch-off: var(--switch-off);
+  --skel-a: var(--skel-a);
+  --skel-b: var(--skel-b);
   --shadow: 0 1px 2px rgba(22, 35, 46, 0.05), 0 4px 16px rgba(22, 35, 46, 0.06);
   --radius: 16px;
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0e161e;
+  --card: #16212c;
+  --surface: #1b2835;
+  --ink: #dbe4ec;
+  --muted: #8fa0b0;
+  --brand: #14b8a6;
+  --brand-deep: #5eead4;
+  --brand-ink: #99f6e4;
+  --brand-weak: #123633;
+  --green: #34d399;
+  --green-weak: #10352a;
+  --red: #fb7185;
+  --red-weak: #3a1722;
+  --amber: #fbbf24;
+  --border: #26333f;
+  --input-bg: #1b2835;
+  --soft: #1b2835;
+  --soft2: #202e3b;
+  --track: #26333f;
+  --hover: #223040;
+  --switch-off: #3a4a5a;
+  --skel-a: #202e3b;
+  --skel-b: #26333f;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.35), 0 4px 16px rgba(0, 0, 0, 0.3);
 }
 
 * {
@@ -27,6 +65,7 @@ html {
 
 body {
   margin: 0;
+  transition: background 0.25s ease, color 0.25s ease;
   background: var(--bg);
   color: var(--ink);
   font-family: -apple-system, "PingFang SC", "HarmonyOS Sans SC", "Microsoft YaHei", "Segoe UI", system-ui, sans-serif;
@@ -84,6 +123,22 @@ body {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+.theme-btn {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  opacity: 1;
+}
+
+.theme-btn i {
+  font-size: 16px;
+  color: var(--muted);
+}
+
+.theme-btn:hover i { color: var(--ink); }
 
 /* ---------- 英雄区 ---------- */
 .hero {
@@ -148,7 +203,7 @@ body {
 
 .skel-hero {
   height: 150px;
-  background: linear-gradient(90deg, #e4e8ec 25%, #eef1f4 37%, #e4e8ec 63%);
+  background: linear-gradient(90deg, var(--skel-a) 25%, var(--skel-b) 37%, var(--skel-a) 63%);
   background-size: 400% 100%;
   animation: shimmer 1.2s ease infinite;
   border-radius: 20px;
@@ -218,7 +273,7 @@ body {
 .card-tag {
   font-size: 11px;
   color: var(--muted);
-  background: #f1f3f6;
+  background: var(--soft2);
   border-radius: 999px;
   padding: 2px 10px;
   white-space: nowrap;
@@ -289,7 +344,7 @@ body {
   padding: 9px 11px;
   font-size: 16px;
   font-family: inherit;
-  background: #fafbfc;
+  background: var(--input-bg);
   color: var(--ink);
   outline: none;
   width: 100%;
@@ -299,7 +354,7 @@ body {
 .field input:focus,
 .field select:focus {
   border-color: var(--brand);
-  background: #fff;
+  background: var(--surface);
   box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.12);
 }
 
@@ -321,13 +376,13 @@ body {
   font-family: inherit;
   width: 100%;
   outline: none;
-  background: #fafbfc;
+  background: var(--input-bg);
   margin-bottom: 12px;
 }
 
 .note-input:focus {
   border-color: var(--brand);
-  background: #fff;
+  background: var(--surface);
 }
 
 /* ---------- 按钮 ---------- */
@@ -362,7 +417,7 @@ body {
   min-height: 30px;
 }
 
-.btn-ghost:hover { background: #f3f4f6; }
+.btn-ghost:hover { background: var(--hover); }
 
 .btn-small {
   background: var(--brand);
@@ -389,7 +444,7 @@ body {
 /* ---------- 分段切换 ---------- */
 .seg {
   display: flex;
-  background: #eef0f4;
+  background: var(--track);
   border-radius: 12px;
   padding: 3px;
   margin-bottom: 14px;
@@ -409,7 +464,7 @@ body {
 }
 
 .seg-btn.on {
-  background: #fff;
+  background: var(--surface);
   color: var(--ink);
   font-weight: 700;
   box-shadow: var(--shadow);
@@ -461,7 +516,7 @@ body {
 
 .cat-chip {
   border: 1.5px solid var(--border);
-  background: #fff;
+  background: var(--surface);
   border-radius: 12px;
   padding: 8px 4px 6px;
   font-family: inherit;
@@ -602,7 +657,7 @@ body {
 
 .icon-btn i { font-size: 15px; }
 
-.icon-btn:hover { opacity: 1; background: #f3f4f6; }
+.icon-btn:hover { opacity: 1; background: var(--hover); }
 
 .pending-dot {
   position: absolute;
@@ -632,7 +687,7 @@ body {
   font-family: inherit;
   flex: 1;
   min-width: 0;
-  background: #fafbfc;
+  background: var(--input-bg);
   outline: none;
 }
 
@@ -657,7 +712,7 @@ body {
 }
 
 .sum-item {
-  background: #f8fafb;
+  background: var(--soft);
   border-radius: 12px;
   padding: 12px 14px;
   display: flex;
@@ -701,7 +756,7 @@ body {
 
 .bar {
   height: 10px;
-  background: #eef0f4;
+  background: var(--track);
   border-radius: 999px;
   overflow: hidden;
 }
@@ -733,8 +788,8 @@ body {
 
 /* ---------- 公式 ---------- */
 .formula {
-  background: #f8fafb;
-  border: 1px dashed #d6dce2;
+  background: var(--soft);
+  border: 1px dashed var(--border);
   border-radius: 12px;
   padding: 10px 14px;
   margin-top: 10px;
@@ -795,7 +850,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  background: #f8fafb;
+  background: var(--soft);
   border-radius: 12px;
   padding: 14px 16px;
 }
@@ -981,13 +1036,13 @@ body {
   padding: 9px 12px 9px 32px;
   font-size: 14px;
   font-family: inherit;
-  background: #fafbfc;
+  background: var(--input-bg);
   outline: none;
 }
 
 .search-input:focus {
   border-color: var(--brand);
-  background: #fff;
+  background: var(--surface);
 }
 
 /* ---------- 自定义月份下拉 ---------- */
@@ -1005,14 +1060,14 @@ body {
   padding: 8px 11px;
   font-size: 13px;
   font-family: inherit;
-  background: #fafbfc;
+  background: var(--input-bg);
   color: var(--ink);
   cursor: pointer;
   min-height: 38px;
   transition: border-color 0.15s, background 0.15s;
 }
 
-.msel-btn:hover { background: #fff; }
+.msel-btn:hover { background: var(--surface); }
 
 .msel-btn.active {
   border-color: var(--brand);
@@ -1038,7 +1093,7 @@ body {
   min-width: 150px;
   max-height: 260px;
   overflow: auto;
-  background: #fff;
+  background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 12px;
   box-shadow: 0 8px 28px rgba(22, 35, 46, 0.16);
@@ -1063,7 +1118,7 @@ body {
   cursor: pointer;
 }
 
-.msel-item:hover { background: #f3f4f6; }
+.msel-item:hover { background: var(--hover); }
 
 .msel-item.on {
   color: var(--brand-deep);
@@ -1090,7 +1145,7 @@ body {
 
 .mini-chip {
   border: 1.5px solid var(--border);
-  background: #fff;
+  background: var(--surface);
   border-radius: 999px;
   padding: 3px 14px;
   font-size: 12px;
@@ -1122,8 +1177,8 @@ body {
 
 /* ---------- 周期记账 ---------- */
 .hint-warn {
-  background: #fffbeb;
-  color: #92400e;
+  background: var(--warn-bg);
+  color: var(--warn-ink);
   border-radius: 10px;
   padding: 8px 12px;
   font-size: 12.5px;
@@ -1131,7 +1186,7 @@ body {
 }
 
 .rule-form {
-  background: #f8fafb;
+  background: var(--soft);
   border-radius: 12px;
   padding: 12px 14px;
   margin-bottom: 12px;
@@ -1172,7 +1227,7 @@ body {
   height: 24px;
   border-radius: 999px;
   border: none;
-  background: #c6cdd5;
+  background: var(--switch-off);
   cursor: pointer;
   flex-shrink: 0;
   transition: background 0.2s ease;
@@ -1187,7 +1242,7 @@ body {
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  background: #fff;
+  background: #ffffff;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
   transition: left 0.2s ease;
 }
@@ -1270,7 +1325,7 @@ body {
   list-style: none;
   margin: 10px 0 0;
   padding: 10px 12px;
-  background: #f8fafb;
+  background: var(--soft);
   border-radius: 10px;
 }
 
@@ -1289,7 +1344,7 @@ body {
 /* ---------- 预算 ---------- */
 .budget-box {
   margin-top: 14px;
-  background: #f8fafb;
+  background: var(--soft);
   border-radius: 12px;
   padding: 12px 14px;
 }
@@ -1302,14 +1357,14 @@ body {
 .budget-warn { color: var(--amber); font-weight: 700; }
 
 .banner-warn {
-  background: #fffbeb;
-  color: #92400e;
-  border: 1px solid #fde68a;
+  background: var(--warn-bg);
+  color: var(--warn-ink);
+  border: 1px solid var(--warn-border);
 }
 
 /* ---------- 骨架屏 ---------- */
 .skel {
-  background: linear-gradient(90deg, #eceef3 25%, #f6f7fa 37%, #eceef3 63%);
+  background: linear-gradient(90deg, var(--skel-a) 25%, var(--skel-b) 37%, var(--skel-a) 63%);
   background-size: 400% 100%;
   animation: shimmer 1.2s ease infinite;
   border-radius: 8px;

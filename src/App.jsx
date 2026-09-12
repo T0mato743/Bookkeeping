@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { supabase } from './supabaseClient'
 import { computeRealHourly, monthSummary, totalBalance, currentMonth, fmtMoney, fmtHours, avgMonthlyExpense } from './utils'
+import { useTheme } from './theme'
 import AuthView from './components/AuthView'
 import SettingsCard from './components/SettingsCard'
 import QuickAdd from './components/QuickAdd'
@@ -23,6 +24,7 @@ export default function App() {
   const [writeErr, setWriteErr] = useState(null) // { msg, retry }
   const [migrationNeeded, setMigrationNeeded] = useState(false)
   const [synced, setSynced] = useState(false)
+  const { theme, setTheme } = useTheme()
 
   // ---------- 认证 ----------
   useEffect(() => {
@@ -201,6 +203,13 @@ export default function App() {
         </div>
         <div className="topbar-right">
           <span className="user-email">{session.user.email}</span>
+          <button
+            className="icon-btn theme-btn"
+            title={theme === 'dark' ? '切换到亮色模式' : '切换到深色模式'}
+            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+          >
+            <i className={theme === 'dark' ? 'ri-sun-line' : 'ri-moon-line'} />
+          </button>
           <button className="btn-ghost" onClick={signOut}>退出</button>
         </div>
       </header>
@@ -264,6 +273,7 @@ export default function App() {
             />}
 
         <Records
+          userId={uid}
           transactions={transactions}
           loading={loading}
           markTxLocal={markTxLocal}

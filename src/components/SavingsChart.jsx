@@ -1,12 +1,16 @@
 import { useMemo } from 'react'
 import { monthlyCumulative } from '../utils'
-import EChart, { echarts, shortMoney } from './EChart'
+import EChart, { echarts, shortMoney, chartPalette } from './EChart'
+import { useTheme } from '../theme'
 
 // 存款曲线：每月累计结余 + 自由基金目标线 + 安全垫线
 export default function SavingsChart({ transactions, settings }) {
+  const { theme } = useTheme()
+
   const option = useMemo(() => {
     const series = monthlyCumulative(transactions)
     if (!series.length) return null
+    const p = chartPalette(theme === 'dark')
     const freedom = Number(settings.freedom_target) || 0
     const safety = Number(settings.safety_target) || 0
 
@@ -14,6 +18,9 @@ export default function SavingsChart({ transactions, settings }) {
       grid: { left: 6, right: 14, top: 30, bottom: 4, containLabel: true },
       tooltip: {
         trigger: 'axis',
+        backgroundColor: p.tooltipBg,
+        borderColor: p.tooltipBorder,
+        textStyle: { color: p.tooltipText },
         valueFormatter: (v) => '¥' + Number(v).toLocaleString('zh-CN', { maximumFractionDigits: 0 }),
       },
       xAxis: {
@@ -21,13 +28,13 @@ export default function SavingsChart({ transactions, settings }) {
         boundaryGap: false,
         data: series.map((s) => s.month),
         axisTick: { show: false },
-        axisLine: { lineStyle: { color: '#e6e9ee' } },
-        axisLabel: { color: '#9ca3af', formatter: (m) => `${Number(m.slice(0, 4)) % 100}/${Number(m.slice(5))}` },
+        axisLine: { lineStyle: { color: p.axisLine } },
+        axisLabel: { color: p.axisLabel, formatter: (m) => `${Number(m.slice(0, 4)) % 100}/${Number(m.slice(5))}` },
       },
       yAxis: {
         type: 'value',
-        axisLabel: { color: '#9ca3af', formatter: shortMoney },
-        splitLine: { lineStyle: { color: '#eef0f4' } },
+        axisLabel: { color: p.axisLabel, formatter: shortMoney },
+        splitLine: { lineStyle: { color: p.splitLine } },
       },
       series: [
         {
@@ -64,7 +71,7 @@ export default function SavingsChart({ transactions, settings }) {
         },
       ],
     }
-  }, [transactions, settings])
+  }, [transactions, settings, theme])
 
   return (
     <section className="card c-chart">

@@ -9,6 +9,8 @@ export default function RecurringCard({ userId, onWriteError, migrationNeeded })
   const [showForm, setShowForm] = useState(false)
   const [form, setForm] = useState({ kind: 'expense', amount: '', category: '房租', note: '', day: 1 })
   const [busy, setBusy] = useState(false)
+  const [editingId, setEditingId] = useState(null)
+  const [editDraft, setEditDraft] = useState(null)
 
   useEffect(() => {
     load()
@@ -77,6 +79,46 @@ export default function RecurringCard({ userId, onWriteError, migrationNeeded })
     }
   }
 
+  async function saveEdit(rule) {
+    if (busy) return
+    const amt = Number(editDraft.amount)
+    const day = Number(editDraft.day)
+    if (!Number.isFinite(amt) || amt <= 0) {
+      onWriteError(new Error('金额要大于 0'), () => saveEdit(rule))
+      return
+    }
+    if (!Number.isInteger(day) || day < 1 || day > 31) {
+      onWriteError(new Error('日期要在 1~31 之间'), () => saveEdit(rule))
+      return
+    }
+    const patch = {
+      kind: editDraft.kind,
+      amount: amt,
+      category: editDraft.category,
+      note: editDraft.note.trim(),
+      day_of_month: day,
+    }
+    setBusy(true)
+    setRules((l) => l.map((r) => (r.id === rule.id ? { ...r, ...patch } : r)))
+    try {
+      const { data, error } = await supabase
+        .from('recurring_rules')
+        .update(patch)
+        .eq('id', rule.id)
+        .select()
+        .single()
+      if (error) throw error
+      setRules((l) => l.map((r) => (r.id === rule.id ? data : r)))
+      setEditingId(null)
+      await supabase.rpc('run_recurring', { p_user: userId })
+    } catch (e) {
+      setRules((l) => l.map((r) => (r.id === rule.id ? rule : r)))
+      onWriteError(e, () => saveEdit(rule))
+    } finally {
+      setBusy(false)
+    }
+  }
+
   async function toggleActive(rule) {
     const next = !rule.active
     setRules((l) => l.map((r) => (r.id === rule.id ? { ...r, active: next } : r)))
@@ -103,11 +145,24 @@ export default function RecurringCard({ userId, onWriteError, migrationNeeded })
     }
   }
 
+  function startEdit(rule) {
+    setEditingId(rule.id)
+    setEditDraft({
+      kind: rule.kind,
+      amount: rule.amount,
+      category: rule.category,
+      note: rule.note,
+      day: rule.day_of_month,
+    })
+  }
+
+  const editCats = editDraft ? (editDraft.kind === 'expense' ? EXPENSE_CATEGORIES : INCOME_CATEGORIES) : []
+
   return (
     <section className="card c-recurring">
       <div className="card-head">
         <h2>周期记账</h2>
-        <button className="link-btn" onClick={() => setShowForm((v) => !v)}>
+        <button className="link-btn" onClick={() => { setShowForm((v) => !v); setEditingId(null) }}>
           {showForm ? '收起' : '+ 添加规则'}
         </button>
       </div>
@@ -162,33 +217,73 @@ export default function RecurringCard({ userId, onWriteError, migrationNeeded })
         </div>
       ) : (
         <ul className="rule-list">
-          {rules.map((r) => (
-            <li key={r.id} className={`rule-row ${r.active ? '' : 'off'}`}>
-              <span className="tx-avatar"><i className={catIcon(r.category)} /></span>
-              <div className="tx-main">
-                <span className="tx-cat">
-                  {r.category}
-                  {r.note && <span className="tx-note"> {r.note}</span>}
+          {rules.map((r) =>
+            editingId === r.id ? (
+              <li key={r.id} className="rule-row editing">
+                <div className="rule-edit">
+                  <div className="rule-form-row">
+                    <label className="field grow">
+                      <span>金额 (¥)</span>
+                      <input type="number" inputMode="decimal" min="0" step="0.01" value={editDraft.amount}
+                        onChange={(e) => setEditDraft({ ...editDraft, amount: e.target.value })} />
+                    </label>
+                    <label className="field">
+                      <span>每月几号</span>
+                      <input type="number" inputMode="numeric" min="1" max="31" value={editDraft.day}
+                        onChange={(e) => setEditDraft({ ...editDraft, day: e.target.value })} />
+                    </label>
+                  </div>
+                  <div className="rule-form-row">
+                    <label className="field grow">
+                      <span>分类</span>
+                      <select value={editDraft.category} onChange={(e) => setEditDraft({ ...editDraft, category: e.target.value })}>
+                        {editCats.map((c) => <option key={c} value={c}>{c}</option>)}
+                      </select>
+                    </label>
+                    <label className="field grow">
+                      <span>备注</span>
+                      <input type="text" value={editDraft.note} onChange={(e) => setEditDraft({ ...editDraft, note: e.target.value })} />
+                    </label>
+                  </div>
+                  <div className="tx-edit-actions">
+                    <button className="btn-small" onClick={() => saveEdit(r)} disabled={busy}>保存</button>
+                    <button className="btn-small ghost2" onClick={() => setEditingId(null)}>取消</button>
+                  </div>
+                </div>
+              </li>
+            ) : (
+              <li key={r.id} className={`rule-row ${r.active ? '' : 'off'}`}>
+                <span className="tx-avatar"><i className={catIcon(r.category)} /></span>
+                <div className="tx-main">
+                  <span className="tx-cat">
+                    {r.category}
+                    {r.note && <span className="tx-note"> {r.note}</span>}
+                  </span>
+                  <span className="tx-date">
+                    {r.active ? nextOccurrenceText(r.day_of_month, r.last_generated) : '已停用'}
+                  </span>
+                </div>
+                <span className={`tx-amount ${r.kind === 'income' ? 'in' : 'out'}`}>
+                  {r.kind === 'income' ? '+' : '−'}{fmtMoney(r.amount, 0)}
                 </span>
-                <span className="tx-date">
-                  {r.active ? nextOccurrenceText(r.day_of_month, r.last_generated) : '已停用'}
+                <span className="tx-actions">
+                  <button className="icon-btn" title="编辑" onClick={() => startEdit(r)}>
+                    <i className="ri-pencil-line" />
+                  </button>
+                  <button
+                    className={`switch ${r.active ? 'on' : ''}`}
+                    role="switch"
+                    aria-checked={r.active}
+                    title={r.active ? '点击停用' : '点击启用'}
+                    onClick={() => toggleActive(r)}
+                  />
+                  <button className="icon-btn" title="删除" onClick={() => del(r)}>
+                    <i className="ri-delete-bin-line" />
+                  </button>
                 </span>
-              </div>
-              <span className={`tx-amount ${r.kind === 'income' ? 'in' : 'out'}`}>
-                {r.kind === 'income' ? '+' : '−'}{fmtMoney(r.amount, 0)}
-              </span>
-              <span className="tx-actions">
-                <button
-                  className={`switch ${r.active ? 'on' : ''}`}
-                  role="switch"
-                  aria-checked={r.active}
-                  title={r.active ? '点击停用' : '点击启用'}
-                  onClick={() => toggleActive(r)}
-                />
-                <button className="icon-btn" title="删除" onClick={() => del(r)}>🗑️</button>
-              </span>
-            </li>
-          ))}
+              </li>
+            ),
+          )}
         </ul>
       )}
     </section>

@@ -1,5 +1,5 @@
-// 回归测试：node --test tests/utils.test.mjs
-import { test } from 'node:test'
+// 回归测试：npm test（vitest）
+import { test } from 'vitest'
 import assert from 'node:assert/strict'
 import {
   computeRealHourly, monthSummary, totalBalance, avgMonthlyExpense,

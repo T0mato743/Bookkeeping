@@ -1,11 +1,12 @@
-// 新功能回归测试：筛选/周报/饼图/CSV/预算/周期下次日期
-import { test } from 'node:test'
+// 新功能回归测试：筛选/周报/饼图/CSV/预算/周期下次日期/导入
+import { test } from 'vitest'
 import assert from 'node:assert/strict'
 import {
   buildMonthOptions, filterTransactions, categoryBreakdown,
   weeklyExpense, weeklyInsights, budgetState, buildCsv,
-  nextOccurrenceText,
+  nextOccurrenceText, normalizeImportRows, dedupeImportRows,
 } from '../src/utils.js'
+import Papa from 'papaparse'
 
 const TX = [
   { kind: 'expense', amount: 50, category: '餐饮', note: '午饭', occurred_at: '2026-09-01' },
@@ -77,15 +78,53 @@ test('预算状态：关闭/正常/预警/超支', () => {
   assert.ok(Math.abs(budgetState(1000, 500).pct - 50) < 1e-9)
 })
 
-test('CSV：表头、转义、BOM 由调用方处理', () => {
-  const csv = buildCsv([
+test('CSV：papaparse 生成、转义、往返解析一致', () => {
+  const rows = [
     { occurred_at: '2026-09-01', kind: 'expense', amount: 12.5, category: '餐饮', note: '含,逗号"引号"' },
     { occurred_at: '2026-09-02', kind: 'income', amount: 9, category: '工资', note: '', rule_id: 'r1' },
-  ])
+  ]
+  const csv = buildCsv(rows)
   const lines = csv.split('\r\n')
   assert.equal(lines[0], '日期,类型,分类,金额,备注,来源')
   assert.ok(lines[1].includes('"含,逗号""引号"""'))
   assert.ok(lines[2].includes('周期'))
+  // 往返：解析回来的数据与原始一致
+  const back = Papa.parse(csv, { header: true, skipEmptyLines: true })
+  assert.equal(back.data.length, 2)
+  assert.equal(back.data[0]['分类'], '餐饮')
+  assert.equal(Number(back.data[0]['金额']), 12.5)
+  assert.equal(back.data[1]['来源'], '周期')
+})
+
+test('导入解析：校验与规范化', () => {
+  const raw = [
+    { '日期': '2026-09-01', '类型': '支出', '分类': '餐饮', '金额': '12.5', '备注': '午饭' },
+    { '日期': '2026/9/2', '类型': '收入', '分类': '工资', '金额': '9000', '备注': '' }, // 斜杠日期可接受
+    { '日期': '2026-13-01', '类型': '支出', '分类': '餐饮', '金额': '10', '备注': '' }, // 非法日期
+    { '日期': '2026-09-03', '类型': '转账', '分类': '餐饮', '金额': '10', '备注': '' }, // 非法类型
+    { '日期': '2026-09-04', '类型': '支出', '分类': '餐饮', '金额': '0', '备注': '' }, // 非法金额
+    { '类型': '支出', '金额': '1' }, // 缺日期
+  ]
+  const { valid, invalid } = normalizeImportRows(raw)
+  assert.equal(valid.length, 2)
+  assert.equal(invalid, 4)
+  assert.equal(valid[0].occurred_at, '2026-09-01')
+  assert.equal(valid[0].kind, 'expense')
+  assert.equal(valid[1].occurred_at, '2026-09-02')
+  assert.equal(valid[1].kind, 'income')
+})
+
+test('导入去重：与现有记录完全相同的跳过', () => {
+  const existing = [
+    { occurred_at: '2026-09-01', kind: 'expense', category: '餐饮', note: '午饭', amount: 12.5 },
+  ]
+  const rows = [
+    { occurred_at: '2026-09-01', kind: 'expense', category: '餐饮', note: '午饭', amount: 12.5 }, // 重复
+    { occurred_at: '2026-09-01', kind: 'expense', category: '餐饮', note: '午饭', amount: 13 }, // 金额不同
+    { occurred_at: '2026-09-05', kind: 'income', category: '工资', note: '', amount: 1 }, // 新记录
+  ]
+  const kept = dedupeImportRows(rows, existing)
+  assert.equal(kept.length, 2)
 })
 
 test('周期规则下次日期', () => {

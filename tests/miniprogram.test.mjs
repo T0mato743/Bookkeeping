@@ -1,6 +1,6 @@
 // 小程序回归测试：模拟 wx API，验证认证流程与 Supabase 请求构造
-// 运行：node --test tests/miniprogram.test.mjs
-import { test, beforeEach } from 'node:test'
+// 运行：npm test（vitest）
+import { test, beforeEach } from 'vitest'
 import assert from 'node:assert/strict'
 
 // ---------- wx 模拟 ----------

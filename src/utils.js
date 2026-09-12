@@ -1,3 +1,6 @@
+import dayjs from 'dayjs'
+import Papa from 'papaparse'
+
 // ---------- 分类 ----------
 // 这些分类的支出算「固定支出」，其余算「弹性支出」
 export const FIXED_CATEGORIES = ['房租', '水电煤', '话费网费', '订阅服务', '保险']
@@ -54,17 +57,13 @@ export function computeRealHourly(s, overrides = {}) {
 // ---------- 周期记账 ----------
 // 规则的下次记账日描述
 export function nextOccurrenceText(dayOfMonth, lastGenerated) {
-  const today = todayStr()
-  const [y, m] = today.split('-').map(Number)
-  const daysInMonth = (yy, mm) => new Date(yy, mm, 0).getDate()
-  const mk = (yy, mm) => `${yy}-${String(mm).padStart(2, '0')}-${String(Math.min(dayOfMonth, daysInMonth(yy, mm))).padStart(2, '0')}`
-  const nextMonth = (yy, mm) => (mm === 12 ? [yy + 1, 1] : [yy, mm + 1])
-  let next = mk(y, m)
-  if ((lastGenerated && lastGenerated >= next) || next < today) {
-    const [ny, nm] = nextMonth(y, m)
-    next = mk(ny, nm)
+  const today = dayjs()
+  const mk = (d) => d.date(Math.min(dayOfMonth, d.daysInMonth()))
+  let next = mk(today)
+  if ((lastGenerated && lastGenerated >= next.format('YYYY-MM-DD')) || next.isBefore(today, 'day')) {
+    next = mk(next.add(1, 'month'))
   }
-  return `每月 ${dayOfMonth} 日 · 下次 ${next.slice(5).replace('-', '/')}`
+  return `每月 ${dayOfMonth} 日 · 下次 ${next.format('MM/DD')}`
 }
 
 // ---------- 搜索与按月筛选 ----------
@@ -118,17 +117,15 @@ function pad2(n) {
   return String(n).padStart(2, '0')
 }
 
-export function weeklyExpense(transactions, weeks = 8, now = new Date()) {
-  const dow = (now.getDay() + 6) % 7 // 周一=0
-  const cur = new Date(now.getFullYear(), now.getMonth(), now.getDate() - dow)
+export function weeklyExpense(transactions, weeks = 8, now = dayjs()) {
+  const cur = dayjs(now)
+  const monday = cur.subtract((cur.day() + 6) % 7, 'day') // 周一=0
   const out = []
   for (let i = weeks - 1; i >= 0; i--) {
-    const start = new Date(cur)
-    start.setDate(start.getDate() - 7 * i)
-    const end = new Date(start)
-    end.setDate(end.getDate() + 6)
-    const s = `${start.getFullYear()}-${pad2(start.getMonth() + 1)}-${pad2(start.getDate())}`
-    const e = `${end.getFullYear()}-${pad2(end.getMonth() + 1)}-${pad2(end.getDate())}`
+    const start = monday.subtract(7 * i, 'day')
+    const end = start.add(6, 'day')
+    const s = start.format('YYYY-MM-DD')
+    const e = end.format('YYYY-MM-DD')
     let expense = 0
     let income = 0
     const byCat = {}
@@ -144,7 +141,7 @@ export function weeklyExpense(transactions, weeks = 8, now = new Date()) {
     out.push({
       start: s,
       end: e,
-      label: `${start.getMonth() + 1}/${start.getDate()}`,
+      label: start.format('M/D'),
       expense,
       income,
       topCategory: top ? top[0] : null,
@@ -186,24 +183,70 @@ export function budgetState(budgetMonthly, monthExpense) {
 }
 
 // ---------- CSV 导出 ----------
-function csvCell(v) {
-  const s = String(v ?? '')
-  return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s
-}
-
 export function buildCsv(transactions) {
-  const rows = [['日期', '类型', '分类', '金额', '备注', '来源']]
-  for (const t of transactions) {
-    rows.push([
+  return Papa.unparse({
+    fields: ['日期', '类型', '分类', '金额', '备注', '来源'],
+    data: transactions.map((t) => [
       t.occurred_at || '',
       t.kind === 'income' ? '收入' : '支出',
       t.category || '',
       Number(t.amount) || 0,
       t.note || '',
       t.rule_id ? '周期' : '手动',
-    ])
+    ]),
+  })
+}
+
+// 解析导入的原始行（来自 papaparse header 模式）→ 校验并规范化
+export function normalizeImportRows(rawRows) {
+  const valid = []
+  let invalid = 0
+  for (const r of rawRows) {
+    // 日期：允许 2026-9-2 / 2026/09/02 等写法，校验月日范围后补零
+    const rawDate = String(r['日期'] || '').trim().replace(/\//g, '-')
+    const dm = rawDate.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/)
+    let date = null
+    if (dm) {
+      const y = Number(dm[1])
+      const mo = Number(dm[2])
+      const d = Number(dm[3])
+      const dim = mo >= 1 && mo <= 12 ? dayjs(`${y}-${String(mo).padStart(2, '0')}-01`).daysInMonth() : NaN
+      if (d >= 1 && d <= dim) {
+        date = `${y}-${String(mo).padStart(2, '0')}-${String(d).padStart(2, '0')}`
+      }
+    }
+
+    const kindRaw = String(r['类型'] || '').trim()
+    const category = String(r['分类'] || '').trim() || '其他'
+    const note = String(r['备注'] || '').trim()
+    const amount = Number(r['金额'])
+    const lower = kindRaw.toLowerCase()
+    const kind =
+      kindRaw === '收入' || lower === 'income' ? 'income'
+      : kindRaw === '支出' || lower === 'expense' ? 'expense'
+      : null
+
+    if (!date || !kind || !Number.isFinite(amount) || amount <= 0) {
+      invalid++
+      continue
+    }
+    valid.push({
+      occurred_at: date,
+      kind,
+      category,
+      note,
+      amount: Math.round(amount * 100) / 100,
+    })
   }
-  return rows.map((r) => r.map(csvCell).join(',')).join('\r\n')
+  return { valid, invalid }
+}
+
+// 与已有流水完全相同的记录视为重复并跳过
+export function dedupeImportRows(rows, existing) {
+  const keys = new Set(
+    existing.map((t) => `${t.occurred_at}|${t.kind}|${t.category}|${t.note}|${Number(t.amount)}`),
+  )
+  return rows.filter((r) => !keys.has(`${r.occurred_at}|${r.kind}|${r.category}|${r.note}|${r.amount}`))
 }
 
 export function downloadCsv(filename, csv) {
@@ -234,12 +277,11 @@ export function fmtHours(h) {
 }
 
 export function todayStr() {
-  const d = new Date()
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+  return dayjs().format('YYYY-MM-DD')
 }
 
 export function currentMonth() {
-  return todayStr().slice(0, 7)
+  return dayjs().format('YYYY-MM')
 }
 
 // ---------- 统计 ----------
@@ -285,21 +327,14 @@ export function monthlyCumulative(transactions) {
   }
   const months = Object.keys(byMonth).sort()
   if (!months.length) return []
-  const [sy, sm] = months[0].split('-').map(Number)
-  const [ey, em] = currentMonth().split('-').map(Number)
+  const start = dayjs(months[0] + '-01')
+  const end = dayjs().startOf('month')
   const series = []
   let acc = 0
-  let y = sy
-  let m = sm
-  while (y < ey || (y === ey && m <= em)) {
-    const key = `${y}-${String(m).padStart(2, '0')}`
+  for (let d = start; !d.isAfter(end); d = d.add(1, 'month')) {
+    const key = d.format('YYYY-MM')
     acc += byMonth[key] || 0
     series.push({ month: key, balance: acc })
-    m += 1
-    if (m > 12) {
-      m = 1
-      y += 1
-    }
     if (series.length > 240) break
   }
   return series

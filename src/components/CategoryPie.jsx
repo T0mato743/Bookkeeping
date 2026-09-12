@@ -1,19 +1,25 @@
 import { useMemo } from 'react'
 import { currentMonth, categoryBreakdown, fmtMoney } from '../utils'
-import EChart, { echarts } from './EChart'
+import EChart, { chartPalette } from './EChart'
+import { useTheme } from '../theme'
 
 // 本月支出分类环形图
 export default function CategoryPie({ transactions, month = 'all' }) {
+  const { theme } = useTheme()
+
   const option = useMemo(() => {
     const data = categoryBreakdown(transactions, month)
     if (!data.length) return null
+    const p = chartPalette(theme === 'dark')
     const total = data.reduce((s, d) => s + d.total, 0)
 
     return {
       tooltip: {
         trigger: 'item',
-        valueFormatter: (v) => '¥' + Number(v).toLocaleString('zh-CN', { maximumFractionDigits: 2 }),
-        formatter: (p) => `${p.marker}${p.name}<br/>¥${Number(p.value).toLocaleString('zh-CN', { maximumFractionDigits: 2 })}（${p.percent}%）`,
+        backgroundColor: p.tooltipBg,
+        borderColor: p.tooltipBorder,
+        textStyle: { color: p.tooltipText },
+        formatter: (item) => `${item.marker}${item.name}<br/>¥${Number(item.value).toLocaleString('zh-CN', { maximumFractionDigits: 2 })}（${item.percent}%）`,
       },
       legend: {
         orient: 'vertical',
@@ -23,7 +29,7 @@ export default function CategoryPie({ transactions, month = 'all' }) {
         itemWidth: 10,
         itemHeight: 10,
         itemGap: 10,
-        textStyle: { color: '#37474f', fontSize: 12 },
+        textStyle: { color: p.legendText, fontSize: 12 },
         formatter: (name) => {
           const d = data.find((x) => x.category === name)
           return `${name}  ${d ? d.pct.toFixed(0) : 0}%`
@@ -35,8 +41,8 @@ export default function CategoryPie({ transactions, month = 'all' }) {
         left: '27%',
         top: '40%',
         textAlign: 'center',
-        textStyle: { fontSize: 15, fontWeight: 700, color: '#16232e' },
-        subtextStyle: { fontSize: 11, color: '#7b8794' },
+        textStyle: { fontSize: 15, fontWeight: 700, color: p.centerText },
+        subtextStyle: { fontSize: 11, color: p.centerSub },
       },
       series: [
         {
@@ -46,7 +52,7 @@ export default function CategoryPie({ transactions, month = 'all' }) {
           avoidLabelOverlap: true,
           label: { show: false },
           emphasis: { scaleSize: 4 },
-          itemStyle: { borderRadius: 4, borderColor: '#fff', borderWidth: 2 },
+          itemStyle: { borderRadius: 4, borderColor: p.pieBorder, borderWidth: 2 },
           data: data.map((d) => ({
             name: d.category,
             value: d.total,
@@ -55,7 +61,7 @@ export default function CategoryPie({ transactions, month = 'all' }) {
         },
       ],
     }
-  }, [transactions, month])
+  }, [transactions, month, theme])
 
   return (
     <section className="card c-pie">
