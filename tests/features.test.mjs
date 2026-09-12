@@ -96,3 +96,10 @@ test('周期规则下次日期', () => {
   const t2 = nextOccurrenceText(20, null)
   assert.ok(t2.includes('09/20'))
 })
+
+test('周期规则支持 29/30/31 号（当月无该日时落到月末）', () => {
+  // 9 月有 30 天，今天 9/12
+  assert.ok(nextOccurrenceText(29, null).includes('09/29'))
+  assert.ok(nextOccurrenceText(31, null).includes('09/30')) // 9 月没有 31 号 → 30 号
+  // 2 月只到 28 号，补账函数与显示函数都用 min(日, 月长) 兜底
+})

@@ -45,8 +45,8 @@ export default function RecurringCard({ userId, onWriteError, migrationNeeded })
       onWriteError(new Error('金额要大于 0'), addRule)
       return
     }
-    if (!Number.isInteger(day) || day < 1 || day > 28) {
-      onWriteError(new Error('日期要在 1~28 之间'), addRule)
+    if (!Number.isInteger(day) || day < 1 || day > 31) {
+      onWriteError(new Error('日期要在 1~31 之间（当月没有该日时记在月末）'), addRule)
       return
     }
     const payload = {
@@ -129,8 +129,8 @@ export default function RecurringCard({ userId, onWriteError, migrationNeeded })
                 onChange={(e) => setForm({ ...form, amount: e.target.value })} placeholder="0.00" />
             </label>
             <label className="field">
-              <span>每月几号 (1~28)</span>
-              <input type="number" inputMode="numeric" min="1" max="28" value={form.day}
+              <span>每月几号 (1~31)</span>
+              <input type="number" inputMode="numeric" min="1" max="31" value={form.day}
                 onChange={(e) => setForm({ ...form, day: e.target.value })} />
             </label>
           </div>
@@ -147,6 +147,7 @@ export default function RecurringCard({ userId, onWriteError, migrationNeeded })
                 placeholder="如：房租 / 月薪" />
             </label>
           </div>
+          <div className="form-hint">29~31 号：当月没有该日时自动记在当月最后一天（如 2 月记在 2/28）</div>
           <button className="btn-primary btn-block" onClick={addRule} disabled={busy}>
             {busy ? '保存中…' : '保存规则'}
           </button>
@@ -177,9 +178,13 @@ export default function RecurringCard({ userId, onWriteError, migrationNeeded })
                 {r.kind === 'income' ? '+' : '−'}{fmtMoney(r.amount, 0)}
               </span>
               <span className="tx-actions">
-                <button className={`mini-toggle ${r.active ? 'on' : ''}`} title={r.active ? '停用' : '启用'} onClick={() => toggleActive(r)}>
-                  {r.active ? '开' : '关'}
-                </button>
+                <button
+                  className={`switch ${r.active ? 'on' : ''}`}
+                  role="switch"
+                  aria-checked={r.active}
+                  title={r.active ? '点击停用' : '点击启用'}
+                  onClick={() => toggleActive(r)}
+                />
                 <button className="icon-btn" title="删除" onClick={() => del(r)}>🗑️</button>
               </span>
             </li>
